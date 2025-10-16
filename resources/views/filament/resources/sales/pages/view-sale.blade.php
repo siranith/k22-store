@@ -37,12 +37,19 @@
     </style>
 
     <div class="receipt">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">
-            <img src="{{ asset('strange/logo/logo.jpg') }}" alt="Logo" style="max-width:36mm;height:auto;margin-bottom:4px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;padding-bottom:6px">
             <div style="margin-left:auto;display:flex;gap:6px;align-items:center;">
                 <button id="saveImageBtn" type="button" style="font-size:11px;padding:4px;border:1px solid #333;background:#fff;border-radius:4px;cursor:pointer;">Save as Image</button>
                 <button id="printBtn" type="button" style="font-size:11px;padding:4px 6px;border:1px solid #333;background:#fff;border-radius:4px;cursor:pointer;">Print</button>
             </div>
+        </div>
+        <div class="header text-center">
+            <img
+                src="{{ asset('storage/logo/logo.png') }}"
+                alt="Logo"
+                class="mx-auto mb-1"
+                style="max-width: 168px; height:auto;"
+            >
         </div>
         <div class="meta small">
             <!-- <div>Sale: {{ $record->invoice_number ?? ('#' . $record->id) }}</div> -->

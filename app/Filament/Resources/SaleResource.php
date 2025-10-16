@@ -13,6 +13,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Tables\Filters\Filter;
 
 class SaleResource extends Resource
 {
@@ -72,7 +73,17 @@ protected static ?string $navigationGroup = 'POS';
                     ->sortable(),
             ])
             ->filters([
-                //
+                Filter::make('created_at_range')
+                ->label('Created Between')
+                ->form([
+                    Forms\Components\DatePicker::make('from')->label('From'),
+                    Forms\Components\DatePicker::make('until')->label('Until'),
+                ])
+                ->query(function ($query, array $data) {
+                    return $query
+                        ->when($data['from'], fn ($q, $date) => $q->whereDate('created_at', '>=', $date))
+                        ->when($data['until'], fn ($q, $date) => $q->whereDate('created_at', '<=', $date));
+                }),
             ])
             ->actions([
                     Tables\Actions\ViewAction::make(),
