@@ -13,6 +13,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Tables\Filters\SelectFilter;
 
 class ProductResource extends Resource
 {
@@ -70,17 +71,23 @@ class ProductResource extends Resource
                 tables\Columns\TextColumn::make('category.name')->label('Category')->searchable()->sortable(),
                 tables\Columns\TextColumn::make('price')->money('usd', true)->sortable(),
                 tables\Columns\TextColumn::make('cost')->money('usd', true)->sortable(),
-                tables\Columns\TextColumn::make('stock')->sortable(),
+                Tables\Columns\BadgeColumn::make('stock')
+                ->sortable()
+                ->colors([
+                    'danger' => fn ($state) => $state < 5,
+                ]),
+
                 tables\Columns\ImageColumn::make('image')
                 ->label('Image')
                 ->getStateUsing(fn ($record) => $record->image ? Storage::disk('public')->url($record->image) : null)
                 ->square()
                 ->defaultImageUrl(asset('images/no-image.png')),
                 tables\Columns\BooleanColumn::make('is_active')->label('Active')->sortable(),
-                tables\Columns\TextColumn::make('created_at')->dateTime()->sortable(),
+                tables\Columns\TextColumn::make('updated_at')->dateTime()->sortable(),
             ])
             ->filters([
-                Tables\Filters\TrashedFilter::make('category'),
+                SelectFilter::make('category')->relationship('category', 'name')->label('Category'),
+
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
