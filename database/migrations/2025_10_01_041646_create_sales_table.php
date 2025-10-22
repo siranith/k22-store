@@ -13,17 +13,18 @@ return new class extends Migration
     {
         Schema::create('sales', function (Blueprint $table) {
             $table->id();
-            $table->string('invoice_number')->unique();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('customer_id')->nullable()->constrained()->nullOnDelete();
+            $table->string('invoice_number');
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('customer_id')->nullable();
             $table->string('contact_number')->nullable();
             $table->string('address')->nullable();
             $table->decimal('total', 10, 2);
             $table->decimal('paid', 10, 2);
-            $table->string('payment_method')->nullable();;
-            $table->string('customer_type')->nullable()->after('customer_id');
+            $table->string('payment_method')->nullable();
+            $table->string('customer_type')->nullable(); // ✅ remove ->after()
             $table->timestamps();
         });
+
     }
 
     /**
