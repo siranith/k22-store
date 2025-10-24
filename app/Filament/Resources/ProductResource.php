@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Filters\SelectFilter;
 use App\Models\StockMovement;
+use Filament\Tables\Columns\ImageColumn;
 
 class ProductResource extends Resource
 {
@@ -72,17 +73,17 @@ class ProductResource extends Resource
                 tables\Columns\TextColumn::make('category.name')->label('Category')->searchable()->sortable(),
                 tables\Columns\TextColumn::make('price')->money('usd', true)->sortable(),
                 tables\Columns\TextColumn::make('cost')->money('usd', true)->sortable(),
-                Tables\Columns\BadgeColumn::make('stock')
+                tables\Columns\BadgeColumn::make('stock')
                 ->sortable()
                 ->colors([
                     'danger' => fn ($state) => $state < 5,
                 ]),
 
-                tables\Columns\ImageColumn::make('image')
-                ->label('Image')
-                ->getStateUsing(fn ($record) => $record->image ? Storage::disk('public')->url($record->image) : null)
-                ->square()
-                ->defaultImageUrl(asset('images/no-image.png')),
+               ImageColumn::make('image')
+    ->disk('public')
+    ->url(fn ($record) => Storage::disk('public')->url($record->image))
+    ->defaultImageUrl(asset('images/no-image.png')),
+
                 tables\Columns\BooleanColumn::make('is_active')->label('Active')->sortable(),
                 tables\Columns\TextColumn::make('updated_at')->dateTime()->sortable(),
             ])
