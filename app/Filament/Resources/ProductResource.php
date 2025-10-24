@@ -14,6 +14,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Filters\SelectFilter;
+use App\Models\StockMovement;
 
 class ProductResource extends Resource
 {
@@ -42,9 +43,10 @@ class ProductResource extends Resource
                     ->numeric()
                     ->minValue(0),
                 forms\Components\TextInput::make('stock')
-                    ->required()
                     ->numeric()
-                    ->minValue(0),
+                    ->minValue(0)
+                    ->default(0)
+                    ->disabled(fn ($context) => $context === 'edit'),
                 forms\Components\Toggle::make('is_active')
                     ->required()
                     ->default(true),
@@ -90,6 +92,36 @@ class ProductResource extends Resource
 
             ])
             ->actions([
+                Tables\Actions\Action::make('purchase')
+                    ->label('Purchase')
+                    ->icon('heroicon-o-plus')
+                    ->form([
+                        Forms\Components\TextInput::make('quantity')
+                            ->label('Quantity')
+                            ->numeric()
+                            ->default(1)
+                            ->minValue(1)
+                            ->required(),
+                        Forms\Components\TextInput::make('note')
+                            ->label('Note')
+                            ->nullable(),
+                    ])
+                    ->action(function (Product $record, array $data) {
+                        // create stock movement and update product stock
+                        StockMovement::create([
+                            'product_id' => $record->id,
+                            'quantity' => $data['quantity'],
+                            'type' => 'in',
+                            'note' => $data['note'] ?? null,
+                        ]);
+
+                        $record->increment('stock', $data['quantity']);
+
+                        \Filament\Notifications\Notification::make()
+                            ->title("Added {$data['quantity']} to {$record->name}")
+                            ->success()
+                            ->send();
+                    }),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
