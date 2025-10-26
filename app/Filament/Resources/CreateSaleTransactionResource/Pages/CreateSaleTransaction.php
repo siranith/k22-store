@@ -18,6 +18,7 @@ use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
 use Illuminate\Support\Facades\Storage;
 use Filament\Notifications\Notification;
+use Filament\Tables\Columns\ImageColumn;
 
 class CreateSaleTransaction extends Page implements Forms\Contracts\HasForms, Tables\Contracts\HasTable
 {
@@ -88,11 +89,17 @@ public function mount(?int $sale_id = null)
 
                 Forms\Components\TextInput::make('contact_number')
                     ->label('Contact Number')
-                    ->visible(fn (callable $get) => $get('customer_type') === 'regular'),
+                    ->visible(fn (callable $get) => $get('customer_type') === 'regular')
+                    ->required(fn (callable $get) => $get('customer_type') === 'regular'),
 
                 Forms\Components\TextInput::make('address')
                     ->label('Address')
-                    ->visible(fn (callable $get) => $get('customer_type') === 'regular'),
+                    ->visible(fn (callable $get) => $get('customer_type') === 'regular')
+                    ->required(fn (callable $get) => $get('customer_type') === 'regular'),
+                Forms\Components\Checkbox::make('delivery_fee')
+                    ->label('Delivery fee ($1.50)')
+                    ->default(false)
+                    ->reactive(),
             ])
             ->statePath('data');
     }
@@ -101,12 +108,12 @@ public function table(Table $table): Table
     return $table
         ->query(Product::query()->where('is_active', true))
         ->columns([
-            Tables\Columns\ImageColumn::make('image')
-                ->label('Image')
-                ->getStateUsing(fn ($record) => $record->image ? Storage::disk('public')->url($record->image) : null)
-                ->square()
-                ->defaultImageUrl(asset('images/no-image.png')),
-
+            ImageColumn::make('image')
+    ->disk('public')
+    ->height(60)
+    ->url(fn ($record) => Storage::disk('public')->url($record->image))
+    ->openUrlInNewTab()
+    ->defaultImageUrl(asset('images/no-image.png')),
             Tables\Columns\TextColumn::make('name')->searchable()->sortable(),
             Tables\Columns\TextColumn::make('sku')->label('SKU')->searchable()->sortable(),
             Tables\Columns\TextColumn::make('category.name')->label('Category')->searchable()->sortable(),
@@ -194,6 +201,10 @@ public function submit()
     }
 
     DB::transaction(function () use ($data) {
+        $subtotal = collect($this->cart)->sum('line_total');
+        $fee = (!empty($data['delivery_fee'])) ? 1.5 : 0;
+        $totalAmount = $subtotal + $fee;
+
         if ($this->sale_id) {
             // ✅ Update existing sale
             $sale = Sale::find($this->sale_id);
@@ -202,8 +213,8 @@ public function submit()
                 'customer_id'    => $data['customer_id'] ?? null,
                 'contact_number' => $data['contact_number'] ?? '',
                 'address'        => $data['address'] ?? '',
-                'total'          => collect($this->cart)->sum('line_total'),
-                'paid'           => collect($this->cart)->sum('line_total'),
+                'total'          => $totalAmount,
+                'paid'           => $totalAmount,
             ]);
 
             // Remove old sale items
@@ -217,8 +228,8 @@ public function submit()
                 'customer_id'    => $data['customer_id'] ?? null,
                 'contact_number' => $data['contact_number'] ?? '',
                 'address'        => $data['address'] ?? '',
-                'total'          => collect($this->cart)->sum('line_total'),
-                'paid'           => collect($this->cart)->sum('line_total'),
+                'total'          => $totalAmount,
+                'paid'           => $totalAmount,
             ]);
         }
 
