@@ -41,6 +41,7 @@ class ProductResource extends Resource
                 forms\Components\TextInput::make('cost')
                     ->required()
                     ->numeric()
+                    ->step('any')
                     ->minValue(0),
                 forms\Components\TextInput::make('stock')
                     ->numeric()
