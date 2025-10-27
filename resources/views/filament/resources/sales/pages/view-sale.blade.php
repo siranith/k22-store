@@ -45,7 +45,7 @@
         </div>
         <div class="header text-center">
             <img
-                src="{{ asset('storage/logo/logo.png') }}"
+                src="{{ public_path('storage/logo/logo.png') }}"
                 alt="Logo"
                 class="mx-auto mb-1"
                 style="max-width: 168px; height:auto;"
