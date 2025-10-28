@@ -48,7 +48,7 @@
                 src="{{ asset('storage/products/logo.png') }}"
                 alt="Logo"
                 class="mx-auto mb-1"
-                style="max-width: 168px; height:auto;"
+                style="max-width: 68px; height:auto;"
             >
         </div>
         <div class="meta small">
