@@ -45,10 +45,12 @@
         </div>
         <div class="header text-center">
             <img
-                src="{{ asset('storage/logo.png') }}"
+                src="{{ Storage::disk('public')->exists('logo.png') 
+                    ? Storage::disk('public')->url('logo.png')
+                    : asset('images/no-image.png') }}"
                 alt="Logo"
                 class="mx-auto mb-1"
-                style="max-width: 168px; height:auto;"
+                style="max-width: 68px; height:auto;"
             >
         </div>
         <div class="meta small">
