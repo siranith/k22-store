@@ -33,10 +33,10 @@ protected static ?string $navigationGroup = 'POS';
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('invoice_number')
-                    ->label('Invoice Number')
-                    ->searchable()
-                    ->sortable(),
+                // Tables\Columns\TextColumn::make('invoice_number')
+                //     ->label('Invoice Number')
+                //     ->searchable()
+                //     ->sortable(),
                 Tables\Columns\TextColumn::make('contact_number')
                     ->label('Contact Number')
                     ->getStateUsing(function ($record) {
@@ -60,36 +60,47 @@ protected static ?string $navigationGroup = 'POS';
                     })
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('payment_method')
-                    ->label('Payment Method')
+                Tables\Columns\TextColumn::make('total')
+                    ->label('Total')
+                    ->money('usd', true)
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('discount')
+                    ->label('Discount')
+                    ->money('usd', true)
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('paid')
+                    ->label('Paid')
+                    ->money('usd', true)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Created At')
                     ->dateTime('M d, Y H:i')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('total')
-                    ->label('Total')
-                    ->money('usd', true)
-                    ->sortable(),
             ])
             ->filters([
-                Filter::make('created_at_range')
-                ->label('Created Between')
-                ->form([
-                    Forms\Components\DatePicker::make('from')->label('From'),
-                    Forms\Components\DatePicker::make('until')->label('Until'),
-                ])
-                ->query(function ($query, array $data) {
-                    return $query
-                        ->when($data['from'], fn ($q, $date) => $q->whereDate('created_at', '>=', $date))
-                        ->when($data['until'], fn ($q, $date) => $q->whereDate('created_at', '<=', $date));
-                }),
+            Filter::make('created_at_range')
+            ->label('Created Between')
+            ->form([
+                Forms\Components\DatePicker::make('from')->label('From'),
+                Forms\Components\DatePicker::make('until')->label('Until'),
             ])
-            ->actions([
-                    Tables\Actions\ViewAction::make(),
-                    Tables\Actions\EditAction::make(),
-                    Tables\Actions\DeleteAction::make(),
+            ->query(function ($query, array $data) {
+                return $query
+                    ->when($data['from'], fn ($q, $date) => $q->whereDate('created_at', '>=', $date))
+                    ->when($data['until'], fn ($q, $date) => $q->whereDate('created_at', '<=', $date));
+            })
+
             ])
+
+        ->actions([
+            Tables\Actions\ViewAction::make(),
+            Tables\Actions\Action::make('edit')
+            ->label('Edit')
+            ->icon('heroicon-o-pencil')
+            ->url(fn (Sale $record) => '/admin/create-sale-transaction?sale_id=' . $record->id)
+            ->openUrlInNewTab(),
+            Tables\Actions\DeleteAction::make(),
+        ])
             ->bulkActions([
                     Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
@@ -110,9 +121,12 @@ protected static ?string $navigationGroup = 'POS';
         return [
             'index' => Pages\ListSales::route('/'),
             'view' => Pages\ViewSale::route('/{record}'),
-            'create' => Pages\CreateSale::route('/create'),
-            'edit' => Pages\EditSale::route('/{record}/edit'),
         ];
+    }
+
+    public static function getCreateButtonUrl(): string
+    {
+        return '/admin/create-sale-transaction';
     }
 
 }
