@@ -38,14 +38,20 @@ class CreateSaleTransaction extends Page implements Forms\Contracts\HasForms, Ta
     public $unit_price = 0;
     public $quantity = 1;
     public $search_product_text = '';
-public ?int $sale_id = null;
+    public ?int $sale_id = null;
 
 public function mount(?int $sale_id = null)
 {
+    // Support passing sale_id either via mount param or query string (e.g. /admin/create-sale-transaction?sale_id=1)
+    if (is_null($sale_id)) {
+        $sale_id = request()->query('sale_id');
+    }
+
     $this->sale_id = $sale_id;
 
     if ($sale_id) {
-        $sale = Sale::with('items.product')->find($sale_id);
+        // $sale = Sale::with('items.product')->find($sale_id);
+        $sale = Sale::with('saleItems.product')->find($sale_id);
 
         if ($sale) {
             $this->form->fill([
@@ -53,15 +59,35 @@ public function mount(?int $sale_id = null)
                 'customer_id' => $sale->customer_id,
                 'contact_number' => $sale->contact_number,
                 'address' => $sale->address,
+                'delivery_fee' => $sale->delivery_fee,
+                'discount' => $sale->discount,
             ]);
 
-            $this->cart = $sale->items->map(fn ($item) => [
+            // $this->cart = $sale->items->map(fn ($item) => [
+            //     'product_id' => $item->product_id,
+            //     'product_name' => $item->product->name,
+            //     'unit_price' => $item->unit_price,
+            //     'quantity' => $item->quantity,
+            //     'line_total' => $item->unit_price * $item->quantity,
+            // ])->toArray();
+            $this->cart = $sale->saleItems->map(fn ($item) => [
                 'product_id' => $item->product_id,
                 'product_name' => $item->product->name,
                 'unit_price' => $item->unit_price,
                 'quantity' => $item->quantity,
                 'line_total' => $item->unit_price * $item->quantity,
             ])->toArray();
+
+        } else {
+            // Sale id provided but not found — notify and redirect back to sales list
+            Notification::make()
+                ->title('Sale not found')
+                ->danger()
+                ->body('The sale you are trying to edit does not exist or has been deleted.')
+                ->send();
+
+            $this->redirect(SaleResource::getUrl('index'));
+            return;
         }
     }
 }
@@ -90,7 +116,10 @@ public function mount(?int $sale_id = null)
                 Forms\Components\TextInput::make('contact_number')
                     ->label('Contact Number')
                     ->visible(fn (callable $get) => $get('customer_type') === 'regular')
-                    ->required(fn (callable $get) => $get('customer_type') === 'regular'),
+                    ->required(fn (callable $get) => $get('customer_type') === 'regular')
+                    ->numeric()
+                    ->minLength(8)
+                    ->maxLength(15),
 
                 Forms\Components\TextInput::make('address')
                     ->label('Address')
@@ -100,6 +129,10 @@ public function mount(?int $sale_id = null)
                     ->label('Delivery fee ($1.50)')
                     ->default(false)
                     ->reactive(),
+                Forms\Components\TextInput::make('discount')
+                    ->label('Discount ($)')
+                    ->numeric()
+                    ->default(0),
             ])
             ->statePath('data');
     }
@@ -204,64 +237,83 @@ public function submit()
         $subtotal = collect($this->cart)->sum('line_total');
         $fee = (!empty($data['delivery_fee'])) ? 1.5 : 0;
         $totalAmount = $subtotal + $fee;
+        $paid = $totalAmount - ($data['discount'] ?? 0);
 
         if ($this->sale_id) {
-            // ✅ Update existing sale
             $sale = Sale::find($this->sale_id);
             $sale->update([
                 'customer_type'  => $data['customer_type'] ?? 'regular',
-                'customer_id'    => $data['customer_id'] ?? null,
-                'contact_number' => $data['contact_number'] ?? '',
-                'address'        => $data['address'] ?? '',
-                'total'          => $totalAmount,
-                'paid'           => $totalAmount,
+        'customer_id'    => $data['customer_id'] ?? null,
+        'contact_number' => $data['contact_number'] ?? '',
+        'address'        => $data['address'] ?? '',
+        'total'          => $totalAmount,
+        'discount'       => $data['discount'] ?? 0,          // <-- Add this
+        'paid'           => $totalAmount - ($data['discount'] ?? 0), // <-- Correct paid
+
             ]);
 
-            // Remove old sale items
-            $sale->items()->delete();
+    // 🔁 Restore stock before deleting old items
+           foreach ($sale->saleItems as $oldItem) {
+        $product = $oldItem->product;
+        if ($product) {
+            $product->increment('stock', $oldItem->quantity);
+
+            \App\Models\StockMovement::create([
+                'product_id' => $product->id,
+                'quantity' => $oldItem->quantity,
+                'type' => 'in',
+                'reference_id' => $sale->id,
+                'note' => 'Edit sale - restore old stock (' . $sale->invoice_number . ')',
+            ]);
+        }
+    }
+
+    // 🧹 Now safe to delete old items
+    $sale->saleItems()->delete();
         } else {
-            // ✅ Create new sale
-            $sale = Sale::create([
-                'invoice_number' => 'INV-' . now()->timestamp,
-                'user_id'        => auth()->id(),
-                'customer_type'  => $data['customer_type'] ?? 'regular',
-                'customer_id'    => $data['customer_id'] ?? null,
-                'contact_number' => $data['contact_number'] ?? '',
-                'address'        => $data['address'] ?? '',
-                'total'          => $totalAmount,
-                'paid'           => $totalAmount,
-            ]);
-        }
-
-        foreach ($this->cart as $item) {
-            SaleItem::create([
-                'sale_id' => $sale->id,
-                'product_id' => $item['product_id'],
-                'unit_price' => $item['unit_price'],
-                'quantity' => $item['quantity'],
-                'line_total' => $item['line_total'],
-            ]);
-             // Update stock movement (record outgoing stock)
-                StockMovement::create([
-                    'product_id' => $item['product_id'],
-                    'quantity' => -$item['quantity'], // negative means stock out
-                    'type' => 'out',
-                    'reference_id' => $sale->id,
-                    'note' => 'sale #' . $sale->invoice_number,
-                ]);
-
-                $product = Product::find($item['product_id']);
-                if ($product) {
-                    $product->decrement('stock', $item['quantity']);
+                    // ✅ Create new sale
+                    $sale = Sale::create([
+                        'invoice_number' => 'INV-' . now()->timestamp,
+                        'user_id'        => auth()->id(),
+                        'customer_type'  => $data['customer_type'] ?? 'regular',
+                        'customer_id'    => $data['customer_id'] ?? null,
+                        'contact_number' => $data['contact_number'] ?? '',
+                        'address'        => $data['address'] ?? '',
+                        'total'          => $totalAmount,
+                        'discount'      => $data['discount'] ?? 0,
+                        'paid'           => $totalAmount - ($data['discount'] ?? 0),
+                    ]);
                 }
-        }
-    });
-    \Filament\Notifications\Notification::make()
-        ->title($this->sale_id ? 'Sale updated successfully!' : 'Sale created successfully!')
-        ->success()
-        ->send();
 
-    $this->redirect(SaleResource::getUrl('index'));
+                foreach ($this->cart as $item) {
+                    SaleItem::create([
+                        'sale_id' => $sale->id,
+                        'product_id' => $item['product_id'],
+                        'unit_price' => $item['unit_price'],
+                        'quantity' => $item['quantity'],
+                        'line_total' => $item['line_total'],
+                    ]);
+                    // Update stock movement (record outgoing stock)
+                        StockMovement::create([
+                            'product_id' => $item['product_id'],
+                            'quantity' => -$item['quantity'], // negative means stock out
+                            'type' => 'out',
+                            'reference_id' => $sale->id,
+                            'note' => 'sale #' . $sale->invoice_number,
+                        ]);
+
+                        $product = Product::find($item['product_id']);
+                        if ($product) {
+                            $product->decrement('stock', $item['quantity']);
+                        }
+                }
+            });
+            \Filament\Notifications\Notification::make()
+                ->title($this->sale_id ? 'Sale updated successfully!' : 'Sale created successfully!')
+                ->success()
+                ->send();
+
+            $this->redirect(SaleResource::getUrl('index'));
 }
 
 

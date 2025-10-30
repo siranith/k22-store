@@ -12,6 +12,7 @@
     {{-- Cart display --}}
     <div class="mt-6">
         <h2 class="text-lg font-semibold mb-2">Cart</h2>
+        <h2 class="text-md font-medium mb-2">Total: {{ number_format(array_sum(array_column($cart, 'line_total')), 2) }}</h2>
         <table class="w-full text-sm border">
             <thead class="bg-gray-100">
                 <tr>
