@@ -13,7 +13,8 @@ class ListSales extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+                ->url('/admin/create-sale-transaction'),
         ];
     }
 }
