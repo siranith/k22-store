@@ -99,12 +99,12 @@ protected static ?string $navigationGroup = 'POS';
             ->icon('heroicon-o-pencil')
             ->url(fn (Sale $record) => '/admin/create-sale-transaction?sale_id=' . $record->id)
             ->openUrlInNewTab(),
-            Tables\Actions\DeleteAction::make(),
+            // Tables\Actions\DeleteAction::make(),
         ])
             ->bulkActions([
-                    Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                //     Tables\Actions\BulkActionGroup::make([
+                //     Tables\Actions\DeleteBulkAction::make(),
+                // ]),
             ]);
     }
 
