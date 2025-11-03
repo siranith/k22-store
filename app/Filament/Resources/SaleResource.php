@@ -14,13 +14,14 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Filters\Filter;
+use Filament\Tables\Columns\IconColumn;
 
 class SaleResource extends Resource
 {
     protected static ?string $model = Sale::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-protected static ?string $navigationGroup = 'POS';
+    protected static ?string $navigationGroup = 'POS';
     public static function form(Form $form): Form
     {
         return $form
@@ -33,10 +34,12 @@ protected static ?string $navigationGroup = 'POS';
     {
         return $table
             ->columns([
-                // Tables\Columns\TextColumn::make('invoice_number')
-                //     ->label('Invoice Number')
-                //     ->searchable()
-                //     ->sortable(),
+                IconColumn::make('print')
+                ->label('Printed')
+                ->boolean()
+                ->trueIcon('heroicon-o-check-circle')   // ✅ tick icon
+                ->trueColor('success')
+                ->falseColor('danger'),
                 Tables\Columns\TextColumn::make('contact_number')
                     ->label('Contact Number')
                     ->getStateUsing(function ($record) {
