@@ -30,7 +30,7 @@ class SalesSummaryWidget extends BaseWidget
         $weeklyPaid = Sale::whereBetween('created_at', [$startOfWeek, Carbon::now()])->sum('paid');
         $monthlyPaid = Sale::whereBetween('created_at', [$startOfMonth, Carbon::now()])->sum('paid');
 
-         $dailyBenefit = SaleItem::whereHas('sale', function ($query) use ($today) {
+        $Benefit = SaleItem::whereHas('sale', function ($query) use ($today) {
                 $query->whereDate('created_at', $today);
             })
             ->with('product') // eager load product for cost
@@ -39,6 +39,7 @@ class SalesSummaryWidget extends BaseWidget
                 $cost = $item->product?->cost ?? 0;
                 return ($item->unit_price - $cost) * $item->quantity;
             });
+        $dailyBenefit = $Benefit - Sale::whereDate('created_at', $today)->sum('discount');
 
         return [
             Stat::make('Daily Sales', number_format($dailyPaid, 2) . ' $')
@@ -55,10 +56,9 @@ class SalesSummaryWidget extends BaseWidget
                 ->description('Total sale this month')
                 ->descriptionIcon('heroicon-o-chart-bar')
                 ->color('warning'),
-            // Stat::make('Daily Benefit', number_format($dailyBenefit, 2) . ' $')
-            //     ->description('Total benefit today')
-            //     ->color('primary'),
-
+            Stat::make('Daily Benefit(after discount)', number_format($dailyBenefit, 2) . ' $')
+                ->description('Total benefit today')
+                ->color('primary'),
 
         ];
     }

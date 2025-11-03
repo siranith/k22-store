@@ -102,6 +102,7 @@ public function mount(?int $sale_id = null)
                     ->options([
                         'regular' => 'Regular',
                         'member' => 'Member',
+                        'walkin' => 'Walk-in',
                     ])
                     ->required()
                     ->reactive()

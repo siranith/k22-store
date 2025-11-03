@@ -142,45 +142,94 @@
                     if (window.html2canvas) return;
                     await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
                 }
-
                 saveBtn.addEventListener('click', async function(){
-                    // Hide buttons so they don't appear in the captured image
-                    const prevSaveDisplay = saveBtn.style.display;
-                    const prevPrintDisplay = printBtn ? printBtn.style.display : null;
-                    try{
-                        saveBtn.style.display = 'none';
-                        if (printBtn) printBtn.style.display = 'none';
+    const prevSaveDisplay = saveBtn.style.display;
+    const prevPrintDisplay = printBtn ? printBtn.style.display : null;
+    try {
+        saveBtn.style.display = 'none';
+        if (printBtn) printBtn.style.display = 'none';
 
-                        await ensureHtml2Canvas();
-                        const el = document.querySelector('.receipt');
-                        if (!el) return alert('Receipt element not found');
-                        const scale = 2;
-                        const canvas = await html2canvas(el, { scale: scale, useCORS: true, logging: false });
+        await ensureHtml2Canvas();
+        const el = document.querySelector('.receipt');
+        if (!el) return alert('Receipt element not found');
+        const scale = 2;
+        const canvas = await html2canvas(el, { scale: scale, useCORS: true, logging: false });
 
-                        // restore buttons right after snapshot is taken
-                        saveBtn.style.display = prevSaveDisplay;
-                        if (printBtn && prevPrintDisplay !== null) printBtn.style.display = prevPrintDisplay;
+        saveBtn.style.display = prevSaveDisplay;
+        if (printBtn && prevPrintDisplay !== null) printBtn.style.display = prevPrintDisplay;
 
-                        canvas.toBlob(function(blob){
-                            const a = document.createElement('a');
-                            const url = URL.createObjectURL(blob);
-                            const invoice = '{{ $record->invoice_number ?? $record->id }}';
-                            const filename = `receipt-${invoice}-${Date.now()}.png`;
-                            a.href = url;
-                            a.download = filename;
-                            document.body.appendChild(a);
-                            a.click();
-                            a.remove();
-                            setTimeout(()=> URL.revokeObjectURL(url), 1000);
-                        }, 'image/png');
-                    }catch(e){
-                        console.error(e);
-                        // ensure buttons restored on error
-                        saveBtn.style.display = prevSaveDisplay;
-                        if (printBtn && prevPrintDisplay !== null) printBtn.style.display = prevPrintDisplay;
-                        alert('Failed to save image: ' + (e.message || e));
-                    }
+        canvas.toBlob(async function(blob){
+            const a = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            const invoice = '{{ $record->invoice_number ?? $record->id }}';
+            const filename = `receipt-${invoice}-${Date.now()}.png`;
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(()=> URL.revokeObjectURL(url), 1000);
+
+            // ✅ After successful save, update sale.print = true
+            try {
+                await fetch("{{ route('sales.mark-printed', $record->id) }}", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
                 });
+                console.log('✅ Sale marked as printed.');
+            } catch (err) {
+                console.error('⚠️ Failed to update print status:', err);
+            }
+        }, 'image/png');
+    } catch (e) {
+        console.error(e);
+        saveBtn.style.display = prevSaveDisplay;
+        if (printBtn && prevPrintDisplay !== null) printBtn.style.display = prevPrintDisplay;
+        alert('Failed to save image: ' + (e.message || e));
+    }
+});
+
+                // saveBtn.addEventListener('click', async function(){
+                //     // Hide buttons so they don't appear in the captured image
+                //     const prevSaveDisplay = saveBtn.style.display;
+                //     const prevPrintDisplay = printBtn ? printBtn.style.display : null;
+                //     try{
+                //         saveBtn.style.display = 'none';
+                //         if (printBtn) printBtn.style.display = 'none';
+
+                //         await ensureHtml2Canvas();
+                //         const el = document.querySelector('.receipt');
+                //         if (!el) return alert('Receipt element not found');
+                //         const scale = 2;
+                //         const canvas = await html2canvas(el, { scale: scale, useCORS: true, logging: false });
+
+                //         // restore buttons right after snapshot is taken
+                //         saveBtn.style.display = prevSaveDisplay;
+                //         if (printBtn && prevPrintDisplay !== null) printBtn.style.display = prevPrintDisplay;
+
+                //         canvas.toBlob(function(blob){
+                //             const a = document.createElement('a');
+                //             const url = URL.createObjectURL(blob);
+                //             const invoice = '{{ $record->invoice_number ?? $record->id }}';
+                //             const filename = `receipt-${invoice}-${Date.now()}.png`;
+                //             a.href = url;
+                //             a.download = filename;
+                //             document.body.appendChild(a);
+                //             a.click();
+                //             a.remove();
+                //             setTimeout(()=> URL.revokeObjectURL(url), 1000);
+                //         }, 'image/png');
+                //     }catch(e){
+                //         console.error(e);
+                //         // ensure buttons restored on error
+                //         saveBtn.style.display = prevSaveDisplay;
+                //         if (printBtn && prevPrintDisplay !== null) printBtn.style.display = prevPrintDisplay;
+                //         alert('Failed to save image: ' + (e.message || e));
+                //     }
+                // });
             })();
         </script>
     @endpush
