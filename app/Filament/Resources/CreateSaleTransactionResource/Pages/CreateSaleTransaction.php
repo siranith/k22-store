@@ -118,7 +118,6 @@ public function mount(?int $sale_id = null)
                     ->label('Contact Number')
                     ->visible(fn (callable $get) => $get('customer_type') === 'regular')
                     ->required(fn (callable $get) => $get('customer_type') === 'regular')
-                    ->numeric()
                     ->minLength(8)
                     ->maxLength(15),
 
