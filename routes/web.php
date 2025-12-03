@@ -1,11 +1,19 @@
 <?php
 use App\Models\Sale;
+use App\Http\Controllers\PortfolioController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return redirect('/admin');
+// Portfolio Routes (Public)
+Route::prefix('portfolio')->name('portfolio.')->group(function () {
+    Route::get('/', [PortfolioController::class, 'index'])->name('index');
+    Route::get('/category/{category}', [PortfolioController::class, 'category'])->name('category');
+    Route::get('/product/{product}', [PortfolioController::class, 'product'])->name('product');
 });
 
+// Admin routes are handled by Filament (see config/filament.php)
+Route::get('/', function () {
+    return redirect('/portfolio');
+});
 
 Route::post('/sales/{id}/mark-printed', function ($id, Request $request) {
     $sale = Sale::findOrFail($id);
