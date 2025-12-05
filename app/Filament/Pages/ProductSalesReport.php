@@ -52,7 +52,7 @@ class ProductSalesReport extends Page
             ->whereDate('sales.created_at', '<=', $this->until);
 
         if ($this->search) {
-            $query->where('products.name', 'ilike', '%' . $this->search . '%');
+            $query->where('products.name', 'like', '%' . $this->search . '%');
         }
 
         $this->rows = $query->select(
