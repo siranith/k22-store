@@ -1,6 +1,7 @@
 <?php
 use App\Models\Sale;
 use App\Http\Controllers\PortfolioController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 // Portfolio Routes (Public)
