@@ -57,7 +57,7 @@
             <div>ផ្ញើៈ 017​ 955 763</div>
             <!-- <div>ទទួល: {{ $record->customer->name ?? $record->contact_number ?? '—' }}</div> -->
             <div>ទទួល: {{ $record->customer->phone ?? $record->contact_number ?? '—' }}</div>
-            <div>តម្លៃ: {{ number_format($record->paid ?? 0, 2) }}</div>
+            <div>តម្លៃ: ${{ number_format($record->paid ?? 0, 2) }}</div>
         </div>
 
         <div class="hr"></div>
@@ -91,13 +91,13 @@
         <div class="hr"></div>
 
         <table style="width:100%">
-            <!-- <tr>
-                <td class="small">Subtotal</td>
-                <td class="text-right small">{{ number_format($grand, 2) }}</td>
-            </tr> -->
+            <tr>
+                <td class="small">Discount</td>
+                <td class="text-right small">{{ number_format($record->discount ?? 0, 2) }}</td>
+            </tr>
             <tr>
                 <td class="small">Total</td>
-                <td class="text-right small">{{ number_format($record->total ?? $grand, 2) }}</td>
+                <td class="text-right small">{{ number_format(($record->total ?? $grand) - ($record->discount ?? 0), 2) }}</td>
             </tr>
         </table>
 
