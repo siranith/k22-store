@@ -45,9 +45,10 @@ class ProductResource extends Resource
                     ->minValue(0),
                 forms\Components\TextInput::make('stock')
                     ->numeric()
-                    ->minValue(0)
+                    // ->minValue(0)
                     ->default(0)
-                    ->disabled(fn ($context) => $context === 'edit'),
+                    // ->disabled(fn ($context) => $context === 'edit')
+                    ,
                 forms\Components\Toggle::make('is_active')
                     ->required()
                     ->default(true),
