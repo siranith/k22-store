@@ -18,6 +18,7 @@ class Sale extends Model
     'status',
     'paid',
     'payment_method',
+    'cod',
     'customer_type',
     'discount',
     ];

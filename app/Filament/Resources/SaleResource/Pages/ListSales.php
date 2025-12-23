@@ -17,4 +17,16 @@ class ListSales extends ListRecords
                 ->url('/admin/create-sale-transaction'),
         ];
     }
+
+    // Show total paid for the currently applied table query (respects filters)
+    protected function getTableHeading(): ?string
+    {
+        try {
+            $sum = $this->getTableQuery()->sum('paid');
+        } catch (\Throwable $e) {
+            $sum = 0;
+        }
+
+        return 'Sales — Total Paid: $' . number_format($sum, 2);
+    }
 }

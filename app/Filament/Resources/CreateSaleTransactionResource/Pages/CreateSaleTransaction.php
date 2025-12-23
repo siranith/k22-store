@@ -61,6 +61,7 @@ public function mount(?int $sale_id = null)
                 'address' => $sale->address,
                 'delivery_fee' => $sale->delivery_fee,
                 'discount' => $sale->discount,
+                'cod' => $sale->cod,
             ]);
 
             // $this->cart = $sale->items->map(fn ($item) => [
@@ -125,14 +126,23 @@ public function mount(?int $sale_id = null)
                     ->label('Address')
                     ->visible(fn (callable $get) => $get('customer_type') === 'regular')
                     ->required(fn (callable $get) => $get('customer_type') === 'regular'),
-                Forms\Components\Checkbox::make('delivery_fee')
-                    ->label('Delivery fee ($1.50)')
-                    ->default(false)
-                    ->reactive(),
+                Forms\Components\Grid::make()
+                    ->schema([
+                        Forms\Components\Checkbox::make('delivery_fee')
+                            ->label('Delivery fee ($1.50)')
+                            ->default(false)
+                            ->reactive(),
+                        Forms\Components\Checkbox::make('cod')
+                            ->label('Cash on Delivery (COD)')
+                            ->default(false)
+                            ->reactive(),
+                    ])
+                    ->columns(2),
                 Forms\Components\TextInput::make('discount')
                     ->label('Discount ($)')
                     ->numeric()
                     ->default(0),
+
             ])
             ->statePath('data');
     }
@@ -243,14 +253,15 @@ public function submit()
             $sale = Sale::find($this->sale_id);
             $sale->update([
                 'customer_type'  => $data['customer_type'] ?? 'regular',
-        'customer_id'    => $data['customer_id'] ?? null,
-        'contact_number' => $data['contact_number'] ?? '',
-        'address'        => $data['address'] ?? '',
-        'total'          => $totalAmount,
-        'discount'       => $data['discount'] ?? 0,          // <-- Add this
-        'paid'           => $totalAmount - ($data['discount'] ?? 0), // <-- Correct paid
+                'customer_id'    => $data['customer_id'] ?? null,
+                'contact_number' => $data['contact_number'] ?? '',
+                'address'        => $data['address'] ?? '',
+                'total'          => $totalAmount,
+                'discount'       => $data['discount'] ?? 0,
+                'paid'           => $totalAmount - ($data['discount'] ?? 0),
+                'cod'            => $data['cod'] ?? false,
 
-            ]);
+                    ]);
 
     // 🔁 Restore stock before deleting old items
            foreach ($sale->saleItems as $oldItem) {
@@ -282,6 +293,7 @@ public function submit()
                         'total'          => $totalAmount,
                         'discount'      => $data['discount'] ?? 0,
                         'paid'           => $totalAmount - ($data['discount'] ?? 0),
+                        'cod'            => $data['cod'] ?? false,
                     ]);
                 }
 

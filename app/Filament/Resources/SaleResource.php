@@ -72,8 +72,15 @@ class SaleResource extends Resource
                     ->money('usd', true)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('paid')
-                    ->label('Paid')
+                    ->label('Amount Paid')
                     ->money('usd', true)
+                    ->sortable(),
+                IconColumn::make('cod')
+                    ->label('COD')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-check-circle')   // ✅ tick icon
+                    ->trueColor('success')
+                    ->falseColor('negative')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Created At')
@@ -91,8 +98,10 @@ class SaleResource extends Resource
                 return $query
                     ->when($data['from'], fn ($q, $date) => $q->whereDate('created_at', '>=', $date))
                     ->when($data['until'], fn ($q, $date) => $q->whereDate('created_at', '<=', $date));
-            })
-
+            }),
+            Filter::make('cod')
+            ->label('Cash on Delivery (COD)')
+            ->query(fn (Builder $query): Builder => $query->where('cod', true)),
             ])
 
         ->actions([

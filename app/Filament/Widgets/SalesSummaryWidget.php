@@ -56,8 +56,8 @@ class SalesSummaryWidget extends BaseWidget
                 ->description('Total sale this month')
                 ->descriptionIcon('heroicon-o-chart-bar')
                 ->color('warning'),
-            Stat::make('Daily Benefit(after discount)', number_format($dailyBenefit, 2) . ' $')
-                ->description('Total benefit today')
+            Stat::make('Daily Profit(after discount)', number_format($dailyBenefit, 2) . ' $')
+                ->description('Total profit today')
                 ->color('primary'),
 
         ];

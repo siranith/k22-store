@@ -44,7 +44,7 @@
             {{-- Row 3 --}}
             <div>
                 <div class="bg-gray-50 p-3 rounded-xl shadow-sm">
-                    <div class="text-gray-600">Total Benefit (After Discount)</div>
+                    <div class="text-gray-600">Total Profit (After Discount)</div>
                     <div class="text-xl font-bold text-blue-700">
                         ${{ number_format($this->totalBenefit, 2) }}
                     </div>

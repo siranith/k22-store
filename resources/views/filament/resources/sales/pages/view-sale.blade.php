@@ -57,7 +57,7 @@
             <div>ផ្ញើៈ 017​ 955 763</div>
             <!-- <div>ទទួល: {{ $record->customer->name ?? $record->contact_number ?? '—' }}</div> -->
             <div>ទទួល: {{ $record->customer->phone ?? $record->contact_number ?? '—' }}</div>
-            <div>តម្លៃ: ${{ number_format($record->paid ?? 0, 2) }}</div>
+            <div>តម្លៃ: ${{ number_format($record->paid ?? 0, 2) }} {{ $record->cod ? '(COD)' : '' }}</div>
         </div>
 
         <div class="hr"></div>
