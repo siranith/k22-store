@@ -39,6 +39,7 @@ class CreateSaleTransaction extends Page implements Forms\Contracts\HasForms, Ta
     public $quantity = 1;
     public $search_product_text = '';
     public ?int $sale_id = null;
+    protected $listeners = ['submitSale' => 'submit'];
 
 public function mount(?int $sale_id = null)
 {
@@ -130,10 +131,12 @@ public function mount(?int $sale_id = null)
                     ->schema([
                         Forms\Components\Checkbox::make('delivery_fee')
                             ->label('Delivery fee ($1.50)')
+                            ->visible(fn (callable $get) => $get('customer_type') !== 'walkin')
                             ->default(false)
                             ->reactive(),
                         Forms\Components\Checkbox::make('cod')
                             ->label('Cash on Delivery (COD)')
+                            ->visible(fn (callable $get) => $get('customer_type') !== 'walkin')
                             ->default(false)
                             ->reactive(),
                     ])
@@ -149,7 +152,7 @@ public function mount(?int $sale_id = null)
 public function table(Table $table): Table
 {
     return $table
-        ->query(Product::query()->where('is_active', true))
+        ->query(Product::query()->where('is_active', true)->limit(5))
         ->columns([
             ImageColumn::make('image')
     ->disk('public')
@@ -281,7 +284,7 @@ public function submit()
 
     // 🧹 Now safe to delete old items
     $sale->saleItems()->delete();
-        } else {
+                } else {
                     // ✅ Create new sale
                     $sale = Sale::create([
                         'invoice_number' => 'INV-' . now()->timestamp,
@@ -291,9 +294,10 @@ public function submit()
                         'contact_number' => $data['contact_number'] ?? '',
                         'address'        => $data['address'] ?? '',
                         'total'          => $totalAmount,
-                        'discount'      => $data['discount'] ?? 0,
+                        'discount'       => $data['discount'] ?? 0,
                         'paid'           => $totalAmount - ($data['discount'] ?? 0),
                         'cod'            => $data['cod'] ?? false,
+                        'note'           => ($data['cod'] ?? false) ? 'pending' : null,
                     ]);
                 }
 

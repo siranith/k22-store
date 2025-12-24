@@ -13,6 +13,7 @@ class Sale extends Model
     'user_id',
     'contact_number',
     'address',
+    'note',
     'date',
     'total',
     'status',

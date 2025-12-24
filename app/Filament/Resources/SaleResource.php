@@ -40,6 +40,10 @@ class SaleResource extends Resource
                 ->trueIcon('heroicon-o-check-circle')   // ✅ tick icon
                 ->trueColor('success')
                 ->falseColor('danger'),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label('Created At')
+                    ->dateTime('d M h:i A')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('contact_number')
                     ->label('Contact Number')
                     ->getStateUsing(function ($record) {
@@ -51,29 +55,33 @@ class SaleResource extends Resource
                     })
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('address')
-                    ->label('Address')
-                    ->getStateUsing(function ($record) {
-                        $saleAddress = $record->address;
-                        $customerAddress = $record->customer?->address;
+                // Tables\Columns\TextColumn::make('address')
+                //     ->label('Address')
+                //     ->getStateUsing(function ($record) {
+                //         $saleAddress = $record->address;
+                //         $customerAddress = $record->customer?->address;
 
-                        return $saleAddress && $customerAddress && $saleAddress !== $customerAddress
-                            ? "{$saleAddress} ({$customerAddress})"
-                            : ($saleAddress ?: ($customerAddress ?? '—'));
-                    })
-                    ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('total')
-                    ->label('Total')
-                    ->money('usd', true)
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('discount')
-                    ->label('Discount')
-                    ->money('usd', true)
-                    ->sortable(),
+                //         return $saleAddress && $customerAddress && $saleAddress !== $customerAddress
+                //             ? "{$saleAddress} ({$customerAddress})"
+                //             : ($saleAddress ?: ($customerAddress ?? '—'));
+                //     })
+                //     ->searchable()
+                //     ->sortable(),
+                // Tables\Columns\TextColumn::make('total')
+                //     ->label('Total')
+                //     ->money('usd', true)
+                //     ->sortable(),
+                // Tables\Columns\TextColumn::make('discount')
+                //     ->label('Discount')
+                //     ->money('usd', true)
+                //     ->sortable(),
                 Tables\Columns\TextColumn::make('paid')
                     ->label('Amount Paid')
                     ->money('usd', true)
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('note')
+                    ->label('Note')
+                    ->searchable()
                     ->sortable(),
                 IconColumn::make('cod')
                     ->label('COD')
@@ -82,10 +90,7 @@ class SaleResource extends Resource
                     ->trueColor('success')
                     ->falseColor('negative')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label('Created At')
-                    ->dateTime('M d, Y H:i')
-                    ->sortable(),
+
             ])
             ->filters([
             Filter::make('created_at_range')
@@ -106,6 +111,27 @@ class SaleResource extends Resource
 
         ->actions([
             Tables\Actions\ViewAction::make(),
+            Tables\Actions\Action::make('cod_note')
+                ->label('Note')
+                ->icon('heroicon-o-pencil')
+                ->visible(fn (Sale $record): bool => (bool) $record->cod)
+                ->form([
+                    Forms\Components\Select::make('note')
+                        ->label('Note')
+                        ->options([
+                            'padding' => 'Padding',
+                            'success' => 'Success',
+                            'return' => 'Return',
+                        ])
+                        ->required(),
+                ])
+                ->modalHeading('Update Note')
+                ->modalButton('Save')
+                ->action(function (Sale $record, array $data) {
+                    $record->update([
+                        'note' => $data['note'] ?? null,
+                    ]);
+                }),
             Tables\Actions\Action::make('edit')
             ->label('Edit')
             ->icon('heroicon-o-pencil')

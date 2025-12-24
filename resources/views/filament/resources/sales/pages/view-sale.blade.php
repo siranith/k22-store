@@ -35,7 +35,28 @@
         .small { font-size: 10px; }
         .hr { border-top: 1px dashed #333; margin: 6px 0; }
     </style>
+    <div>
+        <div class="filament-page-header">
+            <h2 class="filament-page-header-heading text-xl font-bold">
+                Sale Receipt
+            </h2>
+            <table>
+                <tr>
+                    <td class="font-medium text-sm">Invoice #</td>
+                    <td class="text-sm text-right">{{ $record->invoice_number ?? ('#' . $record->id) }}</td>
+                </tr>
+                <tr>
+                    <td class="font-medium text-sm">Date</td>
+                    <td class="text-sm text-right">{{ $record->created_at?->format('M d, Y H:i') }}</td>
+                </tr>
+                <tr>
+                    <td class="font-medium text-sm">Customer</td>
+                    <td class="text-sm text-right">{{ $record->customer->name ?? 'Walk-in' }}</td>
+                </tr>
 
+            </table>
+        </div>
+    </div>
     <div class="receipt">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;padding-bottom:6px">
             <div style="margin-left:auto;display:flex;gap:6px;align-items:center;">
@@ -96,7 +117,7 @@
                 <td class="text-right small">{{ number_format($record->discount ?? 0, 2) }}</td>
             </tr>
             <tr>
-                <td class="small">Total</td>
+                <td class="small">Amount</td>
                 <td class="text-right small">{{ number_format(($record->total ?? $grand) - ($record->discount ?? 0), 2) }}</td>
             </tr>
         </table>
