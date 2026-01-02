@@ -51,7 +51,11 @@
                 </tr>
                 <tr>
                     <td class="font-medium text-sm">Customer</td>
-                    <td class="text-sm text-right">{{ $record->customer->name ?? 'Walk-in' }}</td>
+                    <td class="text-sm text-right">{{ $record->customer_type ?? '' }}</td>
+                </tr>
+                <tr>
+                    <td class="font-medium text-sm">Contact Name</td>
+                    <td class="text-sm text-right">{{ $record->contact_name ?? '' }}</td>
                 </tr>
 
             </table>
@@ -60,8 +64,8 @@
     <div class="receipt">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;padding-bottom:6px">
             <div style="margin-left:auto;display:flex;gap:6px;align-items:center;">
-                <button id="saveImageBtn" type="button" style="font-size:11px;padding:4px;border:1px solid #333;background:#fff;border-radius:4px;cursor:pointer;">Save as Image</button>
-                <button id="printBtn" type="button" style="font-size:11px;padding:4px 6px;border:1px solid #333;background:#fff;border-radius:4px;cursor:pointer;">Print</button>
+                <button id="saveImageBtn" type="button" style="font-size:11px;padding:4px;border:1px solid #333;background:#FF7A14;border-radius:4px;cursor:pointer;color:#fff;width:100px">Save</button>
+                <!-- <button id="printBtn" type="button" style="font-size:11px;padding:4px 6px;border:1px solid #333;background:#fff;border-radius:4px;cursor:pointer;">Print</button> -->
             </div>
         </div>
         <div class="header text-center">
@@ -213,44 +217,7 @@
     }
 });
 
-                // saveBtn.addEventListener('click', async function(){
-                //     // Hide buttons so they don't appear in the captured image
-                //     const prevSaveDisplay = saveBtn.style.display;
-                //     const prevPrintDisplay = printBtn ? printBtn.style.display : null;
-                //     try{
-                //         saveBtn.style.display = 'none';
-                //         if (printBtn) printBtn.style.display = 'none';
 
-                //         await ensureHtml2Canvas();
-                //         const el = document.querySelector('.receipt');
-                //         if (!el) return alert('Receipt element not found');
-                //         const scale = 2;
-                //         const canvas = await html2canvas(el, { scale: scale, useCORS: true, logging: false });
-
-                //         // restore buttons right after snapshot is taken
-                //         saveBtn.style.display = prevSaveDisplay;
-                //         if (printBtn && prevPrintDisplay !== null) printBtn.style.display = prevPrintDisplay;
-
-                //         canvas.toBlob(function(blob){
-                //             const a = document.createElement('a');
-                //             const url = URL.createObjectURL(blob);
-                //             const invoice = '{{ $record->invoice_number ?? $record->id }}';
-                //             const filename = `receipt-${invoice}-${Date.now()}.png`;
-                //             a.href = url;
-                //             a.download = filename;
-                //             document.body.appendChild(a);
-                //             a.click();
-                //             a.remove();
-                //             setTimeout(()=> URL.revokeObjectURL(url), 1000);
-                //         }, 'image/png');
-                //     }catch(e){
-                //         console.error(e);
-                //         // ensure buttons restored on error
-                //         saveBtn.style.display = prevSaveDisplay;
-                //         if (printBtn && prevPrintDisplay !== null) printBtn.style.display = prevPrintDisplay;
-                //         alert('Failed to save image: ' + (e.message || e));
-                //     }
-                // });
             })();
         </script>
     @endpush

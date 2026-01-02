@@ -115,7 +115,9 @@ public function mount(?int $sale_id = null)
                     ->options(fn () => Customer::pluck('name', 'id'))
                     ->searchable()
                     ->visible(fn (callable $get) => $get('customer_type') === 'member'),
-
+                Forms\Components\TextInput::make('contact_name')
+                    ->label('Contact Name')
+                    ->visible(fn (callable $get) => $get('customer_type') === 'regular'),
                 Forms\Components\TextInput::make('contact_number')
                     ->label('Contact Number')
                     ->visible(fn (callable $get) => $get('customer_type') === 'regular')
@@ -263,11 +265,11 @@ public function submit()
                 'discount'       => $data['discount'] ?? 0,
                 'paid'           => $totalAmount - ($data['discount'] ?? 0),
                 'cod'            => $data['cod'] ?? false,
-
-                    ]);
+                'contact_name'   => $data['contact_name'] ?? '',
+        ]);
 
     // 🔁 Restore stock before deleting old items
-           foreach ($sale->saleItems as $oldItem) {
+        foreach ($sale->saleItems as $oldItem) {
         $product = $oldItem->product;
         if ($product) {
             $product->increment('stock', $oldItem->quantity);
@@ -298,6 +300,7 @@ public function submit()
                         'paid'           => $totalAmount - ($data['discount'] ?? 0),
                         'cod'            => $data['cod'] ?? false,
                         'note'           => ($data['cod'] ?? false) ? 'pending' : null,
+                        'contact_name'   => $data['contact_name'] ?? '',
                     ]);
                 }
 
@@ -331,7 +334,5 @@ public function submit()
 
             $this->redirect(SaleResource::getUrl('index'));
 }
-
-
 
 }

@@ -22,6 +22,7 @@ class Sale extends Model
     'cod',
     'customer_type',
     'discount',
+    'contact_name',
     ];
     public function saleItems()
 {

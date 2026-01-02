@@ -14,7 +14,9 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Actions\Action;
 
 class SaleResource extends Resource
 {
@@ -44,6 +46,9 @@ class SaleResource extends Resource
                     ->label('Created At')
                     ->dateTime('d M h:i A')
                     ->sortable(),
+                Tables\Columns\TextColumn::make('contact_name')
+                    ->label('Contact Name')
+                    ->searchAble(),
                 Tables\Columns\TextColumn::make('contact_number')
                     ->label('Contact Number')
                     ->getStateUsing(function ($record) {
@@ -55,18 +60,18 @@ class SaleResource extends Resource
                     })
                     ->searchable()
                     ->sortable(),
-                // Tables\Columns\TextColumn::make('address')
-                //     ->label('Address')
-                //     ->getStateUsing(function ($record) {
-                //         $saleAddress = $record->address;
-                //         $customerAddress = $record->customer?->address;
+                Tables\Columns\TextColumn::make('address')
+                    ->label('Address')
+                    ->getStateUsing(function ($record) {
+                        $saleAddress = $record->address;
+                        $customerAddress = $record->customer?->address;
 
-                //         return $saleAddress && $customerAddress && $saleAddress !== $customerAddress
-                //             ? "{$saleAddress} ({$customerAddress})"
-                //             : ($saleAddress ?: ($customerAddress ?? '—'));
-                //     })
-                //     ->searchable()
-                //     ->sortable(),
+                        return $saleAddress && $customerAddress && $saleAddress !== $customerAddress
+                            ? "{$saleAddress} ({$customerAddress})"
+                            : ($saleAddress ?: ($customerAddress ?? '—'));
+                    })
+                    ->searchable()
+                    ->sortable(),
                 // Tables\Columns\TextColumn::make('total')
                 //     ->label('Total')
                 //     ->money('usd', true)
@@ -110,16 +115,17 @@ class SaleResource extends Resource
             ])
 
         ->actions([
-            Tables\Actions\ViewAction::make(),
+            Tables\Actions\ViewAction::make()
+                ->label('')
+                ->icon('heroicon-o-printer'),
             Tables\Actions\Action::make('cod_note')
                 ->label('Note')
-                ->icon('heroicon-o-pencil')
                 ->visible(fn (Sale $record): bool => (bool) $record->cod)
                 ->form([
                     Forms\Components\Select::make('note')
                         ->label('Note')
                         ->options([
-                            'padding' => 'Padding',
+                            'pending' => 'Pending',
                             'success' => 'Success',
                             'return' => 'Return',
                         ])
@@ -133,17 +139,18 @@ class SaleResource extends Resource
                     ]);
                 }),
             Tables\Actions\Action::make('edit')
-            ->label('Edit')
-            ->icon('heroicon-o-pencil')
-            ->url(fn (Sale $record) => '/admin/create-sale-transaction?sale_id=' . $record->id)
-            ->openUrlInNewTab(),
-            // Tables\Actions\DeleteAction::make(),
+                ->label('')
+                ->icon('heroicon-o-pencil')
+                ->url(fn (Sale $record) => '/admin/create-sale-transaction?sale_id=' . $record->id)
+                ->openUrlInNewTab(),
+            Tables\Actions\DeleteAction::make()
+                ->label(''),
         ])
-            ->bulkActions([
-                //     Tables\Actions\BulkActionGroup::make([
-                //     Tables\Actions\DeleteBulkAction::make(),
-                // ]),
-            ]);
+                ->bulkActions([
+                    //     Tables\Actions\BulkActionGroup::make([
+                    //     Tables\Actions\DeleteBulkAction::make(),
+                    // ]),
+                ]);
     }
 
     public static function getRelations(): array
