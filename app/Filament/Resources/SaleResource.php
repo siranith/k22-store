@@ -48,7 +48,10 @@ class SaleResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('contact_name')
                     ->label('Contact Name')
-                    ->searchAble(),
+                    ->getStateUsing(function ($record) {
+                        return $record->contact_name ?: ($record->customer?->name ?? '—');
+                    })
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('contact_number')
                     ->label('Contact Number')
                     ->getStateUsing(function ($record) {
