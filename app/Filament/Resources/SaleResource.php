@@ -115,6 +115,13 @@ class SaleResource extends Resource
             Filter::make('cod')
             ->label('Cash on Delivery (COD)')
             ->query(fn (Builder $query): Builder => $query->where('cod', true)),
+            SelectFilter::make('note')
+            ->label('Note')
+            ->options([
+                'pending' => 'Pending',
+                'success' => 'Success',
+                'return' => 'Return',
+            ]),
             ])
 
         ->actions([

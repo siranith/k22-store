@@ -27,6 +27,7 @@ class SaleReport extends Page implements Tables\Contracts\HasTable, Forms\Contra
     public float $totalPaid = 0;
     public float $totalBenefit = 0;
     public float $totalDiscount = 0;
+    public float $averageSalePerDay = 0;
 
     protected function getViewData(): array
     {
@@ -61,6 +62,24 @@ class SaleReport extends Page implements Tables\Contracts\HasTable, Forms\Contra
         // })->sum();
 
 
+
+        // Calculate average sale per day for the selected range (or for available sales)
+        if ($sales->isEmpty()) {
+            $this->averageSalePerDay = 0;
+        } else {
+            $minCreated = $sales->min('created_at');
+            $maxCreated = $sales->max('created_at');
+            if ($minCreated && $maxCreated) {
+                $start = Carbon::parse($minCreated)->startOfDay();
+                $end = Carbon::parse($maxCreated)->startOfDay();
+                $days = $start->diffInDays($end) + 1; // include both endpoints
+                $days = max(1, $days);
+            } else {
+                $days = 1;
+            }
+
+            $this->averageSalePerDay = $days ? ($this->total / $days) : $this->total;
+        }
 
         return [];
     }

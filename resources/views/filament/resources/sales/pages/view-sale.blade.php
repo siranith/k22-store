@@ -12,6 +12,11 @@
             font-style: normal;
         }
 
+        /* reiterate page size within print-specific rules */
+        @media print {
+            @page { size: 57mm auto; margin: 2mm; }
+        }
+
         .receipt {
             width: 57mm;
             max-width: 57mm;
@@ -34,6 +39,21 @@
         .text-right { text-align: right; }
         .small { font-size: 10px; }
         .hr { border-top: 1px dashed #333; margin: 6px 0; }
+
+        /* print only the receipt area */
+        @media print {
+            body * {
+                visibility: hidden !important;
+            }
+            .receipt, .receipt * {
+                visibility: visible !important;
+            }
+            .receipt {
+                position: absolute;
+                top: 0;
+                left: 0;
+            }
+        }
     </style>
     <div>
         <div class="filament-page-header">
@@ -65,7 +85,7 @@
         <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;padding-bottom:6px">
             <div style="margin-left:auto;display:flex;gap:6px;align-items:center;">
                 <button id="saveImageBtn" type="button" style="font-size:11px;padding:4px;border:1px solid #333;background:#FF7A14;border-radius:4px;cursor:pointer;color:#fff;width:100px">Save</button>
-                <!-- <button id="printBtn" type="button" style="font-size:11px;padding:4px 6px;border:1px solid #333;background:#fff;border-radius:4px;cursor:pointer;">Print</button> -->
+                <button id="printBtn" type="button" style="font-size:11px;padding:4px 6px;border:1px solid #333;background:#fff;border-radius:4px;cursor:pointer;">Print</button>
             </div>
         </div>
         <div class="header text-center">
@@ -152,7 +172,9 @@
                 const saveBtn = document.getElementById('saveImageBtn');
                 const printBtn = document.getElementById('printBtn');
 
+                // focus the print button when the receipt page loads
                 if (printBtn) {
+                    printBtn.focus();
                     printBtn.addEventListener('click', function(){
                         printBtn.style.display = 'none';
                         if (saveBtn) saveBtn.style.display = 'none';
