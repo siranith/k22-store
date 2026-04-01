@@ -51,7 +51,11 @@ class SalesSummaryWidget extends BaseWidget
                 $cost = $item->product?->cost ?? 0;
                 return ($item->unit_price - $cost) * $item->quantity;
             });
-        $dailyBenefit = $Benefit - Sale::whereDate('created_at', $today)->sum('discount');
+
+        $dailyDiscount = Sale::whereDate('created_at', $today)->sum('discount');
+        $dailyDeliveryFee = Sale::whereDate('created_at', $today)->sum('delivery_fee');
+
+        $dailyBenefit = $Benefit - $dailyDiscount - $dailyDeliveryFee;
 
         // Top selling product by quantity
         $top = SaleItem::join('products', 'sale_items.product_id', '=', 'products.id')
@@ -68,7 +72,7 @@ class SalesSummaryWidget extends BaseWidget
                 ->description('Total sale today')
                 ->descriptionIcon('heroicon-o-currency-dollar')
                 ->color('success'),
-            Stat::make('Daily Profit(after discount)', number_format($dailyBenefit, 2) . ' $')
+            Stat::make('Daily Profit (after discount + delivery fee)', number_format($dailyBenefit, 2) . ' $')
                 ->description('Total profit today')
                 ->color('primary'),
             Stat::make('Weekly Sales', number_format($weeklyPaid, 2) . ' $')

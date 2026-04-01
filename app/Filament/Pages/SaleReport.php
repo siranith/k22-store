@@ -27,6 +27,7 @@ class SaleReport extends Page implements Tables\Contracts\HasTable, Forms\Contra
     public float $totalPaid = 0;
     public float $totalBenefit = 0;
     public float $totalDiscount = 0;
+    public float $totalDeliveryFee = 0;
     public float $averageSalePerDay = 0;
 
     protected function getViewData(): array
@@ -42,6 +43,7 @@ class SaleReport extends Page implements Tables\Contracts\HasTable, Forms\Contra
         $this->total = $sales->sum('total');
         $this->totalPaid = $sales->sum('paid');
         $this->totalDiscount = $sales->sum('discount');
+        $this->totalDeliveryFee = $sales->sum('delivery_fee');
         $this->totalCost = $sales->flatMap(function ($sale) {
             return $sale->saleItems->map(function ($item) {
                 $cost = $item->product->cost ?? 0;
@@ -49,7 +51,7 @@ class SaleReport extends Page implements Tables\Contracts\HasTable, Forms\Contra
                 return $cost * $qty;
             });
         })->sum();
-        $this->totalBenefit = $sales->sum('total') - $this->totalCost - $this->totalDiscount;
+        $this->totalBenefit = $sales->sum('total') - $this->totalCost - $this->totalDiscount - $this->totalDeliveryFee;
         // $this->totalBenefit = $sales->flatMap(function ($sale) {
         //     return $sale->saleItems->map(function ($item) {
         //         $cost = $item->product->cost ?? 0;

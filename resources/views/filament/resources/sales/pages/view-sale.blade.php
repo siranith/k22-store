@@ -125,9 +125,9 @@
                         $grand += $line;
                     @endphp
                     <tr>
-                        <td class="item">{{ \Illuminate\Support\Str::limit($item->product->name ?? $item->name ?? '—', 25) }}</td>
-                        <td class="text-right">{{ $qty }}</td>
-                        <td class="text-right">{{ number_format($line, 2) }}</td>
+                        <td class="item"><strong>{{ \Illuminate\Support\Str::limit($item->product->name ?? $item->name ?? '—', 25) }}</strong></td>
+                        <td class="text-right"><strong>{{ $qty }}</strong></td>
+                        <td class="text-right"><strong>{{ number_format($line, 2) }}</strong></td>
                     </tr>
                 @endforeach
             </tbody>
@@ -175,10 +175,26 @@
                 // focus the print button when the receipt page loads
                 if (printBtn) {
                     printBtn.focus();
-                    printBtn.addEventListener('click', function(){
+                    printBtn.addEventListener('click', async function(){
                         printBtn.style.display = 'none';
                         if (saveBtn) saveBtn.style.display = 'none';
+
                         window.print();
+
+                        // Mark as printed after user triggers print
+                        try {
+                            await fetch("{{ route('sales.mark-printed', $record->id) }}", {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'Accept': 'application/json'
+                                },
+                            });
+                            console.log('✅ Sale marked as printed.');
+                        } catch (err) {
+                            console.error('⚠️ Failed to update print status:', err);
+                        }
+
                         setTimeout(()=>{ printBtn.style.display = ''; if (saveBtn) saveBtn.style.display = ''; }, 500);
                     });
                 }
