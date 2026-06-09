@@ -5,15 +5,23 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\Category;
 use Illuminate\View\View;
-
+use Illuminate\Http\Request;
 class PortfolioController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
         $categories = Category::withCount('products')->get();
-        $products = Product::where('is_active', true)
-            ->with('category')
-            ->paginate(12);
+        $query = Product::where('is_active', true)->with('category');
+
+        if ($request->filled('search')) {
+            $searchTerm = '%' . $request->search . '%';
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('name', 'like', $searchTerm)
+                  ->orWhere('description', 'like', $searchTerm);
+            });
+        }
+
+        $products = $query->paginate(12)->withQueryString();
 
         return view('portfolio.index', compact('products', 'categories'));
     }
@@ -23,9 +31,10 @@ class PortfolioController extends Controller
         $categories = Category::withCount('products')->get();
         $products = $category->products()
             ->where('is_active', true)
-            ->paginate(12);
+            ->paginate(12)
+            ->withQueryString();
 
-        return view('portfolio.category', compact('category', 'products', 'categories'));
+        return view('portfolio.index', compact('category', 'products', 'categories'));
     }
 
     public function product(Product $product): View

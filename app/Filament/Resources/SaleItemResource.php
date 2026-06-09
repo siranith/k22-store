@@ -37,9 +37,13 @@ class SaleItemResource extends Resource
                     ->required()
                     ->label('Quantity')
                     ->numeric(),
-                forms\Components\TextInput::make('price')
+                forms\Components\TextInput::make('unit_price')
                     ->required()
-                    ->label('Price')
+                    ->label('Unit Price')
+                    ->numeric(),
+                forms\Components\TextInput::make('line_total')
+                    ->required()
+                    ->label('Line Total')
                     ->numeric(),
             ]);
     }

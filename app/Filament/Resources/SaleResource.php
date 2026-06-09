@@ -98,6 +98,7 @@ class SaleResource extends Resource
                     ->trueColor('success')
                     ->falseColor('negative')
                     ->sortable(),
+               
 
             ])
             ->filters([
@@ -112,9 +113,14 @@ class SaleResource extends Resource
                     ->when($data['from'], fn ($q, $date) => $q->whereDate('created_at', '>=', $date))
                     ->when($data['until'], fn ($q, $date) => $q->whereDate('created_at', '<=', $date));
             }),
-            Filter::make('cod')
-            ->label('Cash on Delivery (COD)')
-            ->query(fn (Builder $query): Builder => $query->where('cod', true)),
+            SelectFilter::make('customer_type')
+            ->label('Customer Type')
+            ->options([
+                'regular' => 'Regular',
+                'member' => 'Member',
+                'walkin' => 'Walk-in',
+                'guest' => 'Guest (Online)',
+            ]),
             SelectFilter::make('note')
             ->label('Note')
             ->options([
@@ -122,12 +128,18 @@ class SaleResource extends Resource
                 'success' => 'Success',
                 'return' => 'Return',
             ]),
+            Filter::make('cod')
+            ->label('Cash on Delivery (COD)')
+            ->query(fn (Builder $query): Builder => $query->where('cod', true)),
+            
             ])
 
         ->actions([
             Tables\Actions\ViewAction::make()
                 ->label('')
-                ->icon('heroicon-o-printer'),
+                ->icon('heroicon-o-printer')
+                ->button()
+                ->color(fn (Sale $record) => $record->customer_type === 'guest' ? 'danger' : 'gray'),
             Tables\Actions\Action::make('cod_note')
                 ->label('Note')
                 ->visible(fn (Sale $record): bool => (bool) $record->cod)

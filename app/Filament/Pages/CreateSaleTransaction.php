@@ -59,6 +59,7 @@ public function mount(?int $sale_id = null)
             $this->form->fill([
                 'customer_type' => $sale->customer_type,
                 'customer_id' => $sale->customer_id,
+                'contact_name' => $sale->contact_name,
                 'contact_number' => $sale->contact_number,
                 'address' => $sale->address,
                 'delivery_fee' => $sale->delivery_fee,
@@ -106,6 +107,7 @@ public function mount(?int $sale_id = null)
                         'regular' => 'Regular',
                         'member' => 'Member',
                         'walkin' => 'Walk-in',
+                        'guest' => 'Guest (Online)',
                     ])
                     ->required()
                     ->reactive()
@@ -118,18 +120,18 @@ public function mount(?int $sale_id = null)
                     ->visible(fn (callable $get) => $get('customer_type') === 'member'),
                 Forms\Components\TextInput::make('contact_name')
                     ->label('Contact Name')
-                    ->visible(fn (callable $get) => $get('customer_type') === 'regular'),
+                    ->visible(fn (callable $get) => in_array($get('customer_type'), ['regular', 'guest'])),
                 Forms\Components\TextInput::make('contact_number')
                     ->label('Contact Number')
-                    ->visible(fn (callable $get) => $get('customer_type') === 'regular')
-                    ->required(fn (callable $get) => $get('customer_type') === 'regular')
+                    ->visible(fn (callable $get) => in_array($get('customer_type'), ['regular', 'guest']))
+                    ->required(fn (callable $get) => in_array($get('customer_type'), ['regular', 'guest']))
                     ->minLength(8)
                     ->maxLength(15),
 
                 Forms\Components\TextInput::make('address')
                     ->label('Address')
-                    ->visible(fn (callable $get) => $get('customer_type') === 'regular')
-                    ->required(fn (callable $get) => $get('customer_type') === 'regular'),
+                    ->visible(fn (callable $get) => in_array($get('customer_type'), ['regular', 'guest']))
+                    ->required(fn (callable $get) => in_array($get('customer_type'), ['regular', 'guest'])),
                 Forms\Components\Grid::make()
                     ->schema([
                         Forms\Components\Checkbox::make('delivery_fee')

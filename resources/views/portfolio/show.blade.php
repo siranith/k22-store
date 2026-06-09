@@ -8,6 +8,13 @@
             <a href="{{ route('portfolio.index') }}" class="text-blue-600 hover:text-blue-800">← Back to Portfolio</a>
         </div>
 
+        <!-- Success Message -->
+        @if(session('success'))
+            <div class="mb-8 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                <span class="block sm:inline">{{ session('success') }}</span>
+            </div>
+        @endif
+
         <div class="bg-white rounded-lg shadow overflow-hidden">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 p-6 md:p-12">
                 <!-- Product Image Gallery -->
@@ -67,12 +74,26 @@
                         </p>
                     </div>
 
-                    <!-- Contact CTA -->
-                    <div class="bg-blue-50 p-6 rounded-lg">
-                        <p class="text-sm text-gray-600 mb-3">Interested in this product?</p>
-                        <a href="mailto:info@example.com" class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
-                            Contact Us for More Information
-                        </a>
+                    <!-- Add to Cart Form -->
+                    <div class="bg-blue-50 p-6 rounded-lg mt-4">
+                        <form action="{{ route('cart.add', $product) }}" method="POST" class="flex flex-col gap-4">
+                            @csrf
+                            <div class="flex items-center gap-4">
+                                <label for="quantity" class="text-gray-700 font-medium">Quantity:</label>
+                                <input type="number" id="quantity" name="quantity" value="1" min="1" max="{{ $product->stock }}" class="w-20 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border">
+                            </div>
+                            
+                            @if($product->stock > 0)
+                                <button type="submit" class="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition flex justify-center items-center gap-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                                    Add to Cart
+                                </button>
+                            @else
+                                <button type="button" disabled class="w-full bg-gray-400 text-white px-6 py-3 rounded-lg font-semibold cursor-not-allowed">
+                                    Out of Stock
+                                </button>
+                            @endif
+                        </form>
                     </div>
                 </div>
             </div>
