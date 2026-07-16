@@ -81,8 +81,7 @@
             </table>
         </div>
     </div>
-    <div class="receipt" style="position: relative; z-index: 1;">
-        
+    <div class="receipt">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;padding-bottom:6px">
             <div style="margin-left:auto;display:flex;gap:6px;align-items:center;">
                 <button id="saveImageBtn" type="button" style="font-size:11px;padding:4px;border:1px solid #333;background:#FF7A14;border-radius:4px;cursor:pointer;color:#fff;width:100px">Save</button>

@@ -6,7 +6,7 @@
     {{-- Cart display --}}
     <div class="mt-2 ">
         <h2 class="text-lg font-semibold mb-2">Cart</h2>
-        <h2 class="text-md font-medium mb-2">Total: {{ number_format(array_sum(array_column($cart, 'line_total')), 2) }}</h2>
+        <h2 class="text-md font-medium mb-2">Total: {{ number_format(array_sum(array_column($cart, 'line_total')) + ((!empty($data['delivery_fee']) && ($data['customer_type'] ?? '') !== 'walkin') ? 2.00 : 0.00), 2) }}</h2>
         <table class="w-full text-sm border bg-warning-50 p-4 rounded">
             <thead class="bg-gray-100">
                 <tr>

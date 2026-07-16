@@ -62,9 +62,9 @@ public function mount(?int $sale_id = null)
                 'contact_name' => $sale->contact_name,
                 'contact_number' => $sale->contact_number,
                 'address' => $sale->address,
-                'delivery_fee' => $sale->delivery_fee,
+                'delivery_fee' => $sale->delivery_fee > 0,
                 'discount' => $sale->discount,
-                'cod' => $sale->cod,
+                'cod' => (bool) $sale->cod,
             ]);
 
             // $this->cart = $sale->items->map(fn ($item) => [

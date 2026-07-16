@@ -61,18 +61,11 @@ public function mount(?int $sale_id = null)
                 'customer_id' => $sale->customer_id,
                 'contact_number' => $sale->contact_number,
                 'address' => $sale->address,
-                'delivery_fee' => $sale->delivery_fee,
+                'delivery_fee' => $sale->delivery_fee > 0,
                 'discount' => $sale->discount,
-                'cod' => $sale->cod,
+                'cod' => (bool) $sale->cod,
             ]);
 
-            // $this->cart = $sale->items->map(fn ($item) => [
-            //     'product_id' => $item->product_id,
-            //     'product_name' => $item->product->name,
-            //     'unit_price' => $item->unit_price,
-            //     'quantity' => $item->quantity,
-            //     'line_total' => $item->unit_price * $item->quantity,
-            // ])->toArray();
             $this->cart = $sale->saleItems->map(fn ($item) => [
                 'product_id' => $item->product_id,
                 'product_name' => $item->product->name,
