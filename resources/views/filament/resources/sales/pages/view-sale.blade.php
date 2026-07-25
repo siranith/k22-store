@@ -53,6 +53,12 @@
                 top: 0;
                 left: 0;
             }
+            .receipt img {
+                filter: grayscale(100%) contrast(300%) brightness(100%);
+                image-rendering: -webkit-optimize-contrast;
+                image-rendering: crisp-edges;
+                image-rendering: pixelated;
+            }
         }
     </style>
     <div>
@@ -93,7 +99,7 @@
                 src="{{ asset('storage/products/logo.png') }}"
                 alt="Logo"
                 class="mx-auto mb-1"
-                style="max-width: 68px; height:auto;"
+                style="max-width: 86px; height:auto;"
             >
         </div>
         <div class="meta small">
@@ -102,7 +108,7 @@
             <div>ផ្ញើៈ 017​ 955 763</div>
             <!-- <div>ទទួល: {{ $record->customer->name ?? $record->contact_number ?? '—' }}</div> -->
             <div>ទទួល: {{ $record->customer->phone ?? $record->contact_number ?? '—' }}</div>
-            <div>តម្លៃ: ${{ number_format($record->paid ?? 0, 2) }} {{ $record->cod ? '(COD)' : '' }}</div>
+            <div>តម្លៃ: @if($record->cod)៛{{$record->paid * 4000}} (COD)@else${{ number_format($record->paid ?? 0, 2) }}@endif</div>
         </div>
 
         <div class="hr"></div>
@@ -148,7 +154,7 @@
 
         <div class="hr"></div>
         <div class="small">{{ $record->created_at?->format('M d, Y H:i') }}</div>
-        <div class="small" style="text-align:center;">Thank you</div>
+        <div class="small mb-6" style="text-align:center;">Thank you</div>
     </div>
 
 </x-filament-panels::page>
