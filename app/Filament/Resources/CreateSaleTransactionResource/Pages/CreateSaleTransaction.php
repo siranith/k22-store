@@ -40,6 +40,7 @@ class CreateSaleTransaction extends Page implements Forms\Contracts\HasForms, Ta
     public $quantity = 1;
     public $search_product_text = '';
     public ?int $sale_id = null;
+    public bool $submitting = false;
     protected $listeners = ['submitSale' => 'submit'];
 
 public function mount(?int $sale_id = null)
@@ -232,6 +233,11 @@ public function removeProduct($index)
 
 public function submit()
 {
+    if ($this->submitting) {
+        return;
+    }
+    $this->submitting = true;
+
     $data = $this->form->getState();
 
     if (empty($this->cart)) {

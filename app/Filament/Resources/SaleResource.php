@@ -75,14 +75,7 @@ class SaleResource extends Resource
                     })
                     ->searchable()
                     ->sortable(),
-                // Tables\Columns\TextColumn::make('total')
-                //     ->label('Total')
-                //     ->money('usd', true)
-                //     ->sortable(),
-                // Tables\Columns\TextColumn::make('discount')
-                //     ->label('Discount')
-                //     ->money('usd', true)
-                //     ->sortable(),
+                
                 Tables\Columns\TextColumn::make('paid')
                     ->label('Amount Paid')
                     ->money('usd', true)

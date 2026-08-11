@@ -43,11 +43,14 @@
         <div class="flex justify-end mt-4">
             <x-filament::button
                 color="success"
-                wire:click="submit"
+                wire:click="checkDuplicateAndSubmit"
+                wire:loading.attr="disabled"
+                wire:target="checkDuplicateAndSubmit,submit"
                 size="lg"
-                class="{{ empty($cart) ? 'opacity-50 pointer-events-none' : '' }}"
+                class="{{ (empty($cart) || $submitting) ? 'opacity-50 pointer-events-none' : '' }}"
             >
-                Save
+                <span wire:loading.remove wire:target="checkDuplicateAndSubmit,submit">Save</span>
+                <span wire:loading wire:target="checkDuplicateAndSubmit,submit">Saving…</span>
             </x-filament::button>
         </div>
     </div>

@@ -40,6 +40,7 @@ class CreateSaleTransaction extends Page implements Forms\Contracts\HasForms, Ta
     public $quantity = 1;
     public $search_product_text = '';
     public ?int $sale_id = null;
+    public bool $submitting = false;
     protected $listeners = ['submitSale' => 'submit'];
 
 public function mount(?int $sale_id = null)
@@ -67,13 +68,6 @@ public function mount(?int $sale_id = null)
                 'cod' => (bool) $sale->cod,
             ]);
 
-            // $this->cart = $sale->items->map(fn ($item) => [
-            //     'product_id' => $item->product_id,
-            //     'product_name' => $item->product->name,
-            //     'unit_price' => $item->unit_price,
-            //     'quantity' => $item->quantity,
-            //     'line_total' => $item->unit_price * $item->quantity,
-            // ])->toArray();
             $this->cart = $sale->saleItems->map(fn ($item) => [
                 'product_id' => $item->product_id,
                 'product_name' => $item->product->name,
@@ -239,8 +233,70 @@ public function removeProduct($index)
         ->send();
 }
 
+public function checkDuplicateAndSubmit()
+{
+    $data = $this->form->getState();
+    $contactNumber = null;
+
+    if (isset($data['customer_type'])) {
+        if ($data['customer_type'] === 'regular') {
+            $contactNumber = $data['contact_number'] ?? null;
+        } elseif ($data['customer_type'] === 'member' && !empty($data['customer_id'])) {
+            $customer = Customer::find($data['customer_id']);
+            $contactNumber = $customer?->phone;
+        }
+    }
+
+    if (empty($this->cart)) {
+        Notification::make()
+            ->title('Cart is empty!')
+            ->danger()
+            ->send();
+        return;
+    }
+
+    if ($contactNumber && !$this->sale_id) {
+        $exists = Sale::whereDate('created_at', now()->toDateString())
+            ->where(function ($query) use ($contactNumber, $data) {
+                $query->where('contact_number', $contactNumber);
+                if (isset($data['customer_type']) && $data['customer_type'] === 'member' && !empty($data['customer_id'])) {
+                    $query->orWhere('customer_id', $data['customer_id']);
+                }
+            })
+            ->exists();
+
+        if ($exists) {
+            Notification::make()
+                ->warning()
+                ->title('លេខទូរស័ព្ទស្ទួន')
+                ->body('លេខទូរស័ព្ទនេះមានការកុម្ម៉ង់រួចហើយក្នុងថ្ងៃនេះ តើអ្នកនៅតែចង់កុម្ម៉ង់ទៀតទេ?')
+                ->persistent()
+                ->actions([
+                    \Filament\Notifications\Actions\Action::make('proceed')
+                        ->button()
+                        ->label('Yes, proceed')
+                        ->dispatch('submitSale')
+                        ->close(),
+                    \Filament\Notifications\Actions\Action::make('cancel')
+                        ->color('secondary')
+                        ->label('Cancel')
+                        ->close(),
+                ])
+                ->send();
+            return;
+        }
+    }
+
+    $this->submit();
+}
+
 public function submit()
 {
+    if ($this->submitting) {
+        return;
+    }
+    $this->submitting = true;
+
     $data = $this->form->getState();
 
     if (empty($this->cart)) {
