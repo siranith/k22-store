@@ -17,7 +17,7 @@ class SaleReport extends Page implements Tables\Contracts\HasTable, Forms\Contra
     use Forms\Concerns\InteractsWithForms;
     protected static string $view = 'filament.resources.sale-report-resource.pages.sale-report';
     protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
-    protected static ?string $navigationGroup = 'POS';
+    protected static ?string $navigationGroup = 'REPORT';
     protected static ?string $navigationLabel = 'Sale Report';
     protected static ?string $slug = 'sale-report';
     protected static bool $shouldRegisterNavigation = true;
@@ -29,6 +29,7 @@ class SaleReport extends Page implements Tables\Contracts\HasTable, Forms\Contra
     public float $totalDiscount = 0;
     public float $totalDeliveryFee = 0;
     public float $averageSalePerDay = 0;
+    public int $totalTransactions = 0;
 
     protected function getViewData(): array
     {
@@ -52,16 +53,7 @@ class SaleReport extends Page implements Tables\Contracts\HasTable, Forms\Contra
             });
         })->sum();
         $this->totalBenefit = $sales->sum('total') - $this->totalCost - $this->totalDiscount - $this->totalDeliveryFee;
-        // $this->totalBenefit = $sales->flatMap(function ($sale) {
-        //     return $sale->saleItems->map(function ($item) {
-        //         $cost = $item->product->cost ?? 0;
-        //         $price = $item->unit_price ?? 0;
-        //         $qty = $item->quantity ?? 0;
-        //         $discount = $item->discount ?? 0;
-        //         return (($price - $cost) * $qty) - $item->sale->discount;
-        //     });
-
-        // })->sum();
+        $this->totalTransactions = $sales->count();
 
 
 

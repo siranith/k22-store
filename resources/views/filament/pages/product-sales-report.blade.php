@@ -4,15 +4,6 @@
     </div>
 
     <form method="GET" class="flex gap-4 items-end flex-wrap">
-        <!-- <div>
-            <label class="block text-sm font-medium text-gray-700">Period</label>
-            <select name="period" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                <option value="day" {{ $period === 'day' ? 'selected' : '' }}>Day</option>
-                <option value="week" {{ $period === 'week' ? 'selected' : '' }}>Week</option>
-                <option value="month" {{ $period === 'month' ? 'selected' : '' }}>Month</option>
-                <option value="custom" {{ $period === 'custom' ? 'selected' : '' }}>Custom</option>
-            </select>
-        </div> -->
 
         <div>
             <label class="block text-sm font-medium text-gray-700">Search Product</label>
@@ -41,6 +32,9 @@
             </div>
             <div class="text-sm text-gray-700">
                 <strong>Total Revenue:</strong> ${{ number_format($totalRevenue, 2) }}
+            </div>
+            <div class="text-sm text-gray-700">
+                <strong>Total Transactions:</strong> {{ number_format($totalTransactions) }}
             </div>
         </div>
     </form>

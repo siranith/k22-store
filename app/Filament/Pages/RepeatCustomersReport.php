@@ -17,7 +17,7 @@ class RepeatCustomersReport extends Page implements Tables\Contracts\HasTable, F
 
     protected static string $view = 'filament.pages.repeat-customers-report';
     protected static ?string $navigationIcon = 'heroicon-o-arrow-path';
-    // protected static ?string $navigationGroup = 'POS';
+    protected static ?string $navigationGroup = 'REPORT';
     protected static ?string $navigationLabel = 'Repeat Customers';
     protected static ?string $slug = 'repeat-customers-report';
     protected static bool $shouldRegisterNavigation = true;

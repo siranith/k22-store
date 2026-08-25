@@ -10,7 +10,7 @@ use Carbon\Carbon;
 class ProductSalesReport extends Page
 {
     protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
-    protected static ?string $navigationGroup = 'POS';
+    protected static ?string $navigationGroup = 'REPORT';
     protected static ?string $navigationLabel = 'Product Sales Report';
     protected static ?int $navigationSort = 5;
 
@@ -23,6 +23,7 @@ class ProductSalesReport extends Page
     public $search;
     public $totalQuantity = 0;
     public $totalRevenue = 0;
+    public $totalTransactions = 0;
 
     public function mount(Request $request)
     {
@@ -54,6 +55,8 @@ class ProductSalesReport extends Page
         if ($this->search) {
             $query->where('products.name', 'like', '%' . $this->search . '%');
         }
+
+        $this->totalTransactions = (clone $query)->distinct()->count('sales.id');
 
         $this->rows = $query->select(
                 'products.id as product_id',

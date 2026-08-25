@@ -67,7 +67,14 @@
                     </div>
                 </div>
             </div>
-
+            <div>
+                <div class="bg-gray-50 p-3 rounded-xl shadow-sm">
+                    <div class="text-gray-600">Total Transactions</div>
+                    <div class="text-xl font-bold text-blue-700">
+                        {{ $this->totalTransactions }}
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
