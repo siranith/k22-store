@@ -89,11 +89,7 @@ class SalesSummaryWidget extends BaseWidget
                 ->description('Today')
                 ->icon('heroicon-o-receipt-refund')
                 ->color('warning'),
-            Stat::make('Transactions (1 Week)', $count1Week)
-                ->description('Last 7 days')
-                ->icon('heroicon-o-receipt-refund')
-                ->color('success'),
-
+            
             Stat::make('Transactions (1 Months)', $count1Month)
                 ->description('Last 1 months')
                 ->icon('heroicon-o-receipt-refund')

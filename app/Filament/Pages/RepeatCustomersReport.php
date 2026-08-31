@@ -86,7 +86,7 @@ class RepeatCustomersReport extends Page implements Tables\Contracts\HasTable, F
                 'contact_number',
                 DB::raw('MAX(contact_name) as contact_name'),
                 DB::raw('COUNT(id) as purchases_count'),
-                DB::raw('SUM(total) as total_spent'),
+                DB::raw('SUM(paid) as total_spent'),
                 DB::raw('MAX(created_at) as last_purchase'),
             ])
             ->whereNotNull('contact_number')

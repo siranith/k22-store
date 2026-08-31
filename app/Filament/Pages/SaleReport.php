@@ -14,7 +14,7 @@ use Carbon\Carbon;
 class SaleReport extends Page implements Tables\Contracts\HasTable, Forms\Contracts\HasForms
 {
     use Tables\Concerns\InteractsWithTable;
-    use Forms\Concerns\InteractsWithForms;
+    // use Forms\Concerns\InteractsWithForms;
     protected static string $view = 'filament.resources.sale-report-resource.pages.sale-report';
     protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
     protected static ?string $navigationGroup = 'REPORT';
