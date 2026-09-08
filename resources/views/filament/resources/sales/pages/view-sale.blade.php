@@ -154,7 +154,8 @@
 
         <div class="hr"></div>
         <div class="small">{{ $record->created_at?->format('M d, Y H:i') }}</div>
-        <div class="small mb-6" style="text-align:center;">Thank you</div>
+        <div class="small py-4" style="text-align:center;">Thank you</div>
+        <hr/>
     </div>
 
 </x-filament-panels::page>

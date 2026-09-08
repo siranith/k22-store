@@ -87,6 +87,10 @@ public function mount(?int $sale_id = null)
             $this->redirect(SaleResource::getUrl('index'));
             return;
         }
+    } else {
+        $this->form->fill([
+            'customer_type' => 'regular',
+        ]);
     }
 }
 
@@ -103,6 +107,7 @@ public function mount(?int $sale_id = null)
                         'walkin' => 'Walk-in',
                         'guest' => 'Guest (Online)',
                     ])
+                    ->default('regular')
                     ->required()
                     ->reactive()
                     ->afterStateUpdated(fn ($state, callable $set) => $set('customer_id', null)),
@@ -114,9 +119,47 @@ public function mount(?int $sale_id = null)
                     ->visible(fn (callable $get) => $get('customer_type') === 'member'),
                 Forms\Components\TextInput::make('contact_name')
                     ->label('Contact Name')
+                    ->datalist(fn () => Sale::query()
+                        ->whereNotNull('contact_name')
+                        ->where('contact_name', '!=', '')
+                        ->distinct()
+                        ->pluck('contact_name')
+                        ->toArray()
+                    )
+                    ->live(debounce: 500)
+                    ->afterStateUpdated(function ($state, callable $set) {
+                        if (blank($state)) {
+                            return;
+                        }
+
+                        $latestSale = Sale::query()
+                            ->where('contact_name', $state)
+                            ->latest('id')
+                            ->first();
+
+                        if ($latestSale) {
+                            if ($latestSale->contact_number) {
+                                $set('contact_number', $latestSale->contact_number);
+                            }
+                            if ($latestSale->address) {
+                                $set('address', $latestSale->address);
+                            }
+                        }
+                    })
+                    ->suffixAction(
+                        Forms\Components\Actions\Action::make('clear')
+                            ->icon('heroicon-m-x-mark')
+                            ->tooltip('Clear contact info')
+                            ->action(function (callable $set) {
+                                $set('contact_name', null);
+                                $set('contact_number', null);
+                                $set('address', null);
+                            })
+                    )
                     ->visible(fn (callable $get) => in_array($get('customer_type'), ['regular', 'guest'])),
                 Forms\Components\TextInput::make('contact_number')
                     ->label('Contact Number')
+                    
                     ->visible(fn (callable $get) => in_array($get('customer_type'), ['regular', 'guest']))
                     ->required(fn (callable $get) => in_array($get('customer_type'), ['regular', 'guest']))
                     ->minLength(8)
