@@ -88,4 +88,29 @@ class MonthlySaleChart extends ChartWidget
     {
         return 'bar';
     }
+
+    protected function getOptions(): array
+    {
+        return [
+            'plugins' => [
+                'legend' => [
+                    'display' => true,
+                ],
+                'barDataLabels' => [
+                    'display' => true,
+                    'prefix' => '$',
+                ],
+            ],
+            'scales' => [
+                'y' => [
+                    'grace' => '10%',
+                ],
+            ],
+            'layout' => [
+                'padding' => [
+                    'top' => 20,
+                ],
+            ],
+        ];
+    }
 }

@@ -40,6 +40,10 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
             SalesSummaryWidget::class, // 👈 Add this line
         ])
+            ->renderHook(
+                \Filament\View\PanelsRenderHook::HEAD_START,
+                fn () => view('filament.hooks.chart-datalabels'),
+            )
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
