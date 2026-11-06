@@ -66,6 +66,7 @@ public function mount(?int $sale_id = null)
                 'delivery_fee' => $sale->delivery_fee > 0,
                 'discount' => $sale->discount,
                 'cod' => (bool) $sale->cod,
+                'exchange_rate' => $sale->exchange_rate,
             ]);
 
             $this->cart = $sale->saleItems->map(fn ($item) => [
@@ -178,6 +179,7 @@ public function mount(?int $sale_id = null)
                             ->reactive(),
                         Forms\Components\Checkbox::make('cod')
                             ->label('Cash on Delivery (COD)')
+                            ->helperText(fn () => 'Exchange rate: $1 = ៛' . number_format(\App\Models\Setting::getExchangeRate()))
                             ->visible(fn (callable $get) => $get('customer_type') !== 'walkin')
                             ->default(false)
                             ->reactive(),

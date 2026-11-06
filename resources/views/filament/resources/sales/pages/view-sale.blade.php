@@ -105,10 +105,11 @@
         <div class="meta small">
             <!-- <div>Sale: {{ $record->invoice_number ?? ('#' . $record->id) }}</div> -->
             <div>ទីតាំង: {{ $record->customer->address ?? $record->address ?? '—' }} </div>
-            <div>ផ្ញើៈ 017​ 955 763</div>
-            <!-- <div>ទទួល: {{ $record->customer->name ?? $record->contact_number ?? '—' }}</div> -->
-            <div>ទទួល: {{ $record->customer->phone ?? $record->contact_number ?? '—' }}</div>
-            <div>តម្លៃ: @if($record->cod)៛{{$record->paid * 4000}} (COD)@else${{ number_format($record->paid ?? 0, 2) }}@endif</div>
+            @php
+                $exchangeRate = (float) ($record->exchange_rate ?: \App\Models\Setting::getExchangeRate());
+                $khrAmount = round(($record->paid ?? 0) * $exchangeRate);
+            @endphp
+            <div>តម្លៃ: @if($record->cod)៛{{ number_format($khrAmount) }} (COD)@else${{ number_format($record->paid ?? 0, 2) }}@endif</div>
         </div>
 
         <div class="hr"></div>

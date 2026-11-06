@@ -10,7 +10,7 @@ class MonthlySaleChart extends ChartWidget
 {
     protected static bool $isDiscovered = false;
 
-    protected static ?string $heading = 'Monthly Sales';
+    protected static ?string $heading = 'Monthly Sales & Benefit';
     
     // To make it take full width
     protected int | string | array $columnSpan = 2;
@@ -32,25 +32,52 @@ class MonthlySaleChart extends ChartWidget
         $activeFilter = $this->filter;
         $year = $activeFilter ? (int) $activeFilter : now()->year;
 
-        // Get all sales for the selected year
-        $sales = Sale::whereYear('created_at', $year)->get();
+        // Get all sales for the selected year with eager loaded items and product
+        $sales = Sale::with(['saleItems.product'])
+            ->whereYear('created_at', $year)
+            ->get();
         
-        $data = [];
+        $salesData = [];
+        $benefitData = [];
         $labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         
         foreach (range(1, 12) as $month) {
-            $data[] = $sales->filter(function ($sale) use ($month) {
+            $monthlySales = $sales->filter(function ($sale) use ($month) {
                 return Carbon::parse($sale->created_at)->month === $month;
-            })->sum('total');
+            });
+
+            $monthlyTotal = $monthlySales->sum('total');
+            $monthlyDiscount = $monthlySales->sum('discount');
+            $monthlyDeliveryFee = $monthlySales->sum('delivery_fee');
+
+            $monthlyCost = $monthlySales->flatMap(function ($sale) {
+                return $sale->saleItems->map(function ($item) {
+                    $cost = $item->product?->cost ?? 0;
+                    $qty = $item->quantity ?? 0;
+                    return $cost * $qty;
+                });
+            })->sum();
+
+            // Calculate benefit excluding delivery fee (Total Sales - Cost - Discount - Delivery Fee)
+            $monthlyBenefit = $monthlyTotal - $monthlyCost - $monthlyDiscount - $monthlyDeliveryFee;
+
+            $salesData[] = round($monthlyTotal, 2);
+            $benefitData[] = round($monthlyBenefit, 2);
         }
 
         return [
             'datasets' => [
                 [
                     'label' => 'Total Sales (' . $year . ')',
-                    'data' => $data,
+                    'data' => $salesData,
                     'backgroundColor' => '#36A2EB',
                     'borderColor' => '#9BD0F5',
+                ],
+                [
+                    'label' => 'Benefit (' . $year . ')',
+                    'data' => $benefitData,
+                    'backgroundColor' => '#22C55E',
+                    'borderColor' => '#16A34A',
                 ],
             ],
             'labels' => $labels,

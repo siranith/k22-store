@@ -24,6 +24,7 @@ class Sale extends Model
     'paid',
     'payment_method',
     'cod',
+    'exchange_rate',
     'customer_type',
     'discount',
     'contact_name',
@@ -69,6 +70,7 @@ class Sale extends Model
             'discount' => $financials['discount'],
             'paid' => $financials['paid'],
             'cod' => $data['cod'] ?? false,
+            'exchange_rate' => $data['exchange_rate'] ?? Setting::getExchangeRate(),
             'note' => ($data['cod'] ?? false) ? 'pending' : null,
             'contact_name' => $data['contact_name'] ?? '',
         ]);
@@ -95,12 +97,18 @@ class Sale extends Model
             'discount' => $financials['discount'],
             'paid' => $financials['paid'],
             'cod' => $data['cod'] ?? false,
+            'exchange_rate' => $data['exchange_rate'] ?? $this->getRawOriginal('exchange_rate') ?? Setting::getExchangeRate(),
             'contact_name' => $data['contact_name'] ?? '',
         ]);
 
         $this->syncItemsAndStocks($cart);
 
         return $this;
+    }
+
+    public function getExchangeRateAttribute($value): float
+    {
+        return (float) ($value ?: Setting::getExchangeRate());
     }
 
     public function restoreStockFromSaleItems(): void

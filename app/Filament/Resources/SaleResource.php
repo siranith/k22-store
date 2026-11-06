@@ -80,6 +80,7 @@ class SaleResource extends Resource
                 Tables\Columns\TextColumn::make('paid')
                     ->label('Amount Paid')
                     ->money('usd', true)
+                    ->description(fn (Sale $record): ?string => $record->cod ? '៛' . number_format(round(($record->paid ?? 0) * $record->exchange_rate)) : null)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('note')
                     ->label('Note')
