@@ -105,6 +105,9 @@
         <div class="meta small">
             <!-- <div>Sale: {{ $record->invoice_number ?? ('#' . $record->id) }}</div> -->
             <div>ទីតាំង: {{ $record->customer->address ?? $record->address ?? '—' }} </div>
+            <div>ផ្ញើៈ 017​ 955 763</div>
+            <!-- <div>ទទួល: {{ $record->customer->name ?? $record->contact_number ?? '—' }}</div> -->
+            <div>ទទួល: {{ $record->customer->phone ?? $record->contact_number ?? '—' }}</div>
             @php
                 $exchangeRate = (float) ($record->exchange_rate ?: \App\Models\Setting::getExchangeRate());
                 $khrAmount = round(($record->paid ?? 0) * $exchangeRate);
